@@ -8,7 +8,8 @@
     "prettify": "prettier \"src/**/*.{js,jsx,ts,tsx}\" --ignore-path ./.prettierignore --write && git add . && git status",
     "build": "npm run build:clean && npm run build:lib",
     "build:clean": "rimraf dist",
-    "build:lib": "cross-env BABEL_ENV=production tsc -p tsconfig.json"
+    "build:lib": "cross-env BABEL_ENV=production tsc -p tsconfig.json",
+    "prepublish": "npm run build"
   },
   "pre-commit": [
     "prettify",
@@ -29,8 +30,10 @@
   },
   "homepage": "https://github.com/react-figma/figma-api-stub#readme",
   "devDependencies": {
+    "cross-env": "^6.0.3",
     "pre-commit": "^1.2.2",
     "prettier": "^1.18.2",
+    "rimraf": "^3.0.0",
     "typescript": "3.5.3"
   }
 }

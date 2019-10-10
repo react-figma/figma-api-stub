@@ -1,2 +1,1 @@
-
-export {createFigma} from "./stubs";
+export { createFigma } from "./stubs";

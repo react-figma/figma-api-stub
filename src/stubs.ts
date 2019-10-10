@@ -1,106 +1,106 @@
-import {applyMixins} from "./applyMixins";
+import { applyMixins } from "./applyMixins";
 
 class ChildrenMixinStub implements ChildrenMixin {
-    children: Array<any>;
-    appendChild(item) {
-        if (!this.children) {
-            this.children = [];
-        }
-        this.children.push(item);
+  children: Array<any>;
+  appendChild(item) {
+    if (!this.children) {
+      this.children = [];
     }
-    insertChild(index: number, child: BaseNode) {
-        if (!this.children) {
-            this.children = [];
-        }
-        this.children.push(index, child);
+    this.children.push(item);
+  }
+  insertChild(index: number, child: BaseNode) {
+    if (!this.children) {
+      this.children = [];
     }
-    findAll(callback) {
-        if (!this.children) {
-            return [];
-        }
-        return this.children.filter(callback);
+    this.children.push(index, child);
+  }
+  findAll(callback) {
+    if (!this.children) {
+      return [];
     }
-    findOne(callback) {
-        if (!this.children) {
-            return null;
-        }
-        return this.children.find(callback);
+    return this.children.filter(callback);
+  }
+  findOne(callback) {
+    if (!this.children) {
+      return null;
     }
+    return this.children.find(callback);
+  }
 }
 
 class BaseNodeMixinStub implements BaseNodeMixin {
-    readonly id: string;
-    readonly parent: (BaseNode & ChildrenMixin) | null
-    name: string
-    removed: boolean
-    private pluginData: { [key: string]: string };
-    private sharedPluginData: { [namespace: string]: {[key: string]: string }};
+  readonly id: string;
+  readonly parent: (BaseNode & ChildrenMixin) | null;
+  name: string;
+  removed: boolean;
+  private pluginData: { [key: string]: string };
+  private sharedPluginData: { [namespace: string]: { [key: string]: string } };
 
-    setPluginData(key: string, value: string) {
-        if (!this.pluginData) {
-            this.pluginData = {};
-        }
-        this.pluginData[key] = value;
+  setPluginData(key: string, value: string) {
+    if (!this.pluginData) {
+      this.pluginData = {};
     }
-    getPluginData(key: string) {
-        if (!this.pluginData) {
-            return;
-        }
-        return this.pluginData[key];
+    this.pluginData[key] = value;
+  }
+  getPluginData(key: string) {
+    if (!this.pluginData) {
+      return;
     }
-    setSharedPluginData(namespace: string, key: string, value: string) {
-        if (!this.sharedPluginData) {
-            this.sharedPluginData = {};
-        }
-        if (!this.sharedPluginData[namespace]) {
-            this.sharedPluginData[namespace] = {};
-        }
-        this.pluginData[key] = value;
+    return this.pluginData[key];
+  }
+  setSharedPluginData(namespace: string, key: string, value: string) {
+    if (!this.sharedPluginData) {
+      this.sharedPluginData = {};
     }
-    getSharedPluginData(namespace: string, key: string) {
-        if (!this.sharedPluginData || !this.sharedPluginData[namespace]) {
-            return;
-        }
-        return this.pluginData[namespace][key];
+    if (!this.sharedPluginData[namespace]) {
+      this.sharedPluginData[namespace] = {};
     }
-    remove() {
-        this.removed = true;
+    this.pluginData[key] = value;
+  }
+  getSharedPluginData(namespace: string, key: string) {
+    if (!this.sharedPluginData || !this.sharedPluginData[namespace]) {
+      return;
     }
+    return this.pluginData[namespace][key];
+  }
+  remove() {
+    this.removed = true;
+  }
 }
 
 class LayoutMixinStub implements LayoutMixin {
-    absoluteTransform: Transform;
-    relativeTransform: Transform;
-    x: number;
-    y: number;
-    rotation: number;
+  absoluteTransform: Transform;
+  relativeTransform: Transform;
+  x: number;
+  y: number;
+  rotation: number;
 
-    width: number;
-    height: number;
+  width: number;
+  height: number;
 
-    resize(width, height) {
-        this.width = width;
-        this.height = height;
-    }
-    resizeWithoutConstraints(width, height) {
-        this.width = width;
-        this.height = height;
-    }
+  resize(width, height) {
+    this.width = width;
+    this.height = height;
+  }
+  resizeWithoutConstraints(width, height) {
+    this.width = width;
+    this.height = height;
+  }
 }
 
 class RectangleNodeStub {
-    type = 'RECTANGLE';
+  type = "RECTANGLE";
 }
 applyMixins(RectangleNodeStub, [BaseNodeMixinStub, LayoutMixinStub]);
 
 class DocumentNodeStub {
-    type = 'DOCUMENT'
+  type = "DOCUMENT";
 }
 applyMixins(DocumentNodeStub, [BaseNodeMixinStub, ChildrenMixinStub]);
 
 export const createFigma = (): PluginAPI => ({
-    // @ts-ignore
-    root: new DocumentNodeStub(),
-    // @ts-ignore
-    createRectangle: () => new RectangleNodeStub()
+  // @ts-ignore
+  root: new DocumentNodeStub(),
+  // @ts-ignore
+  createRectangle: () => new RectangleNodeStub()
 });
