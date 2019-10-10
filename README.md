@@ -1,5 +1,7 @@
 # Figma API Stub
 
+[![npm version](https://img.shields.io/npm/v/figma-api-stub.svg)](https://www.npmjs.com/package/figma-api-stub)
+
 Stub implementation of [Figma Plugins API](https://www.figma.com/plugin-docs/intro/).
 
 ```javascript
