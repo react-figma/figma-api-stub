@@ -1,2 +1,2 @@
 
-export * from "./stubs";
+export {createFigma} from "./stubs";
