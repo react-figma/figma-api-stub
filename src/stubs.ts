@@ -93,14 +93,58 @@ class RectangleNodeStub {
 }
 applyMixins(RectangleNodeStub, [BaseNodeMixinStub, LayoutMixinStub]);
 
+class TextNodeStub {
+  type = "TEXT";
+}
+applyMixins(TextNodeStub, [BaseNodeMixinStub, LayoutMixinStub]);
+
 class DocumentNodeStub {
   type = "DOCUMENT";
 }
 applyMixins(DocumentNodeStub, [BaseNodeMixinStub, ChildrenMixinStub]);
 
+class PageNodeStub {
+  type = "PAGE";
+}
+applyMixins(PageNodeStub, [BaseNodeMixinStub, ChildrenMixinStub]);
+
+class FrameNodeStub {
+  type = "FRAME";
+}
+applyMixins(FrameNodeStub, [BaseNodeMixinStub, ChildrenMixinStub]);
+
+class GroupNodeStub {
+  type = "GROUP";
+}
+applyMixins(GroupNodeStub, [BaseNodeMixinStub, ChildrenMixinStub]);
+
+class ComponentNodeStub {
+  type = "COMPONENT";
+}
+applyMixins(ComponentNodeStub, [BaseNodeMixinStub, ChildrenMixinStub]);
+
 export const createFigma = (): PluginAPI => ({
   // @ts-ignore
   root: new DocumentNodeStub(),
   // @ts-ignore
-  createRectangle: () => new RectangleNodeStub()
+  createPage: () => new PageNodeStub(),
+  // @ts-ignore
+  createFrame: () => new FrameNodeStub(),
+  // @ts-ignore
+  createComponent: () => new ComponentNodeStub(),
+  // @ts-ignore
+  createRectangle: () => new RectangleNodeStub(),
+  // @ts-ignore
+  createText: () => new TextNodeStub(),
+  // @ts-ignore
+  group: (nodes: any, parent: any, index) => {
+    const group: any = new GroupNodeStub();
+    nodes.forEach(node => group.appendChild(node));
+    if (index) {
+      parent.insertChild(index, group);
+    } else {
+      parent.appendChild(group);
+    }
+    return group;
+  }
 });
