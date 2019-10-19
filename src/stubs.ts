@@ -68,6 +68,12 @@ class BaseNodeMixinStub implements BaseNodeMixin {
   }
   remove() {
     this.removed = true;
+    if (this.parent) {
+      // @ts-ignore
+      this.parent.children = this.parent.children.filter(
+        (child: any) => child !== this
+      );
+    }
   }
 }
 
