@@ -6,12 +6,15 @@ class ChildrenMixinStub implements ChildrenMixin {
     if (!this.children) {
       this.children = [];
     }
+    item.parent = this;
     this.children.push(item);
   }
   insertChild(index: number, child: BaseNode) {
     if (!this.children) {
       this.children = [];
     }
+    // @ts-ignore
+    child.parent = this;
     this.children.push(index, child);
   }
   findAll(callback) {
@@ -29,12 +32,12 @@ class ChildrenMixinStub implements ChildrenMixin {
 }
 
 class BaseNodeMixinStub implements BaseNodeMixin {
-  readonly id: string;
-  readonly parent: (BaseNode & ChildrenMixin) | null;
+  id: string;
+  parent: (BaseNode & ChildrenMixin) | null;
   name: string;
   removed: boolean;
-  private pluginData: { [key: string]: string };
-  private sharedPluginData: { [namespace: string]: { [key: string]: string } };
+  pluginData: { [key: string]: string };
+  sharedPluginData: { [namespace: string]: { [key: string]: string } };
 
   setPluginData(key: string, value: string) {
     if (!this.pluginData) {
@@ -145,6 +148,7 @@ export const createFigma = (): PluginAPI => ({
     } else {
       parent.appendChild(group);
     }
+    group.parent = parent;
     return group;
   }
 });
