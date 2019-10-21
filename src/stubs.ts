@@ -22,6 +22,17 @@ export const createFigma = (config: TConfig): PluginAPI => {
           child => child !== item
         );
       }
+
+      if (
+        joinedConfig.simulateErrors &&
+        // @ts-ignore
+        this.type === "DOCUMENT" &&
+        item.type !== "PAGE"
+      ) {
+        throw new Error(
+          "Error: The root node cannot have children of type other than PAGE"
+        );
+      }
       item.parent = this;
       this.children.push(item);
     }
@@ -32,6 +43,17 @@ export const createFigma = (config: TConfig): PluginAPI => {
       // @ts-ignore
       if (joinedConfig.simulateErrors && child.parent === this) {
         throw new Error("Error: Node already inside parent");
+      }
+
+      if (
+        joinedConfig.simulateErrors &&
+        // @ts-ignore
+        this.type === "DOCUMENT" &&
+        child.type !== "PAGE"
+      ) {
+        throw new Error(
+          "Error: The root node cannot have children of type other than PAGE"
+        );
       }
       if (child.parent) {
         child.parent.children = child.parent.children.filter(
