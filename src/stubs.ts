@@ -15,7 +15,7 @@ class ChildrenMixinStub implements ChildrenMixin {
     }
     // @ts-ignore
     child.parent = this;
-    this.children.push(index, child);
+    this.children.splice(index, 0, child);
   }
   findAll(callback) {
     if (!this.children) {
