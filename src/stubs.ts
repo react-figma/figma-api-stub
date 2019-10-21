@@ -1,160 +1,220 @@
 import { applyMixins } from "./applyMixins";
 
-class ChildrenMixinStub implements ChildrenMixin {
-  children: Array<any>;
-  appendChild(item) {
-    if (!this.children) {
-      this.children = [];
+type TConfig = {
+  simulateErrors?: boolean;
+};
+
+const defaultConfig: TConfig = {
+  simulateErrors: false
+};
+
+export const createFigma = (config: TConfig): PluginAPI => {
+  const joinedConfig = { ...defaultConfig, ...config };
+
+  class ChildrenMixinStub implements ChildrenMixin {
+    children: Array<any>;
+    appendChild(item) {
+      if (!this.children) {
+        this.children = [];
+      }
+      if (item.parent) {
+        item.parent.children = item.parent.children.filter(
+          child => child !== item
+        );
+      }
+      item.parent = this;
+      this.children.push(item);
     }
-    item.parent = this;
-    this.children.push(item);
+    insertChild(index: number, child: any) {
+      if (!this.children) {
+        this.children = [];
+      }
+      // @ts-ignore
+      if (joinedConfig.simulateErrors && child.parent === this) {
+        throw new Error("Error: Node already inside parent");
+      }
+      if (child.parent) {
+        child.parent.children = child.parent.children.filter(
+          _child => child !== _child
+        );
+      }
+      // @ts-ignore
+      child.parent = this;
+      this.children.splice(index, 0, child);
+    }
+    findAll(callback) {
+      if (!this.children) {
+        return [];
+      }
+      return this.children.filter(callback);
+    }
+    findOne(callback) {
+      if (!this.children) {
+        return null;
+      }
+      return this.children.find(callback);
+    }
   }
-  insertChild(index: number, child: BaseNode) {
-    if (!this.children) {
-      this.children = [];
+
+  class BaseNodeMixinStub implements BaseNodeMixin {
+    id: string;
+    parent: (BaseNode & ChildrenMixin) | null;
+    name: string;
+    removed: boolean;
+    pluginData: { [key: string]: string };
+    sharedPluginData: { [namespace: string]: { [key: string]: string } };
+
+    setPluginData(key: string, value: string) {
+      if (!this.pluginData) {
+        this.pluginData = {};
+      }
+      this.pluginData[key] = value;
+    }
+    getPluginData(key: string) {
+      if (!this.pluginData) {
+        return;
+      }
+      return this.pluginData[key];
+    }
+    setSharedPluginData(namespace: string, key: string, value: string) {
+      if (!this.sharedPluginData) {
+        this.sharedPluginData = {};
+      }
+      if (!this.sharedPluginData[namespace]) {
+        this.sharedPluginData[namespace] = {};
+      }
+      this.pluginData[key] = value;
+    }
+    getSharedPluginData(namespace: string, key: string) {
+      if (!this.sharedPluginData || !this.sharedPluginData[namespace]) {
+        return;
+      }
+      return this.pluginData[namespace][key];
+    }
+    remove() {
+      this.removed = true;
+      if (this.parent) {
+        // @ts-ignore
+        this.parent.children = this.parent.children.filter(
+          (child: any) => child !== this
+        );
+      }
+    }
+  }
+
+  class LayoutMixinStub implements LayoutMixin {
+    absoluteTransform: Transform;
+    relativeTransform: Transform;
+    x: number;
+    y: number;
+    rotation: number;
+
+    width: number;
+    height: number;
+
+    resize(width, height) {
+      this.width = width;
+      this.height = height;
+    }
+    resizeWithoutConstraints(width, height) {
+      this.width = width;
+      this.height = height;
+    }
+  }
+
+  class RectangleNodeStub {
+    type = "RECTANGLE";
+  }
+  applyMixins(RectangleNodeStub, [BaseNodeMixinStub, LayoutMixinStub]);
+
+  class TextNodeStub {
+    type = "TEXT";
+  }
+  applyMixins(TextNodeStub, [BaseNodeMixinStub, LayoutMixinStub]);
+
+  class DocumentNodeStub {
+    type = "DOCUMENT";
+  }
+  applyMixins(DocumentNodeStub, [BaseNodeMixinStub, ChildrenMixinStub]);
+
+  class PageNodeStub {
+    type = "PAGE";
+  }
+  applyMixins(PageNodeStub, [BaseNodeMixinStub, ChildrenMixinStub]);
+
+  class FrameNodeStub {
+    type = "FRAME";
+  }
+  applyMixins(FrameNodeStub, [BaseNodeMixinStub, ChildrenMixinStub]);
+
+  class GroupNodeStub {
+    type = "GROUP";
+  }
+  applyMixins(GroupNodeStub, [BaseNodeMixinStub, ChildrenMixinStub]);
+
+  class ComponentNodeStub {
+    type = "COMPONENT";
+  }
+  applyMixins(ComponentNodeStub, [BaseNodeMixinStub, ChildrenMixinStub]);
+
+  // @ts-ignore
+  class PluginApiStub implements PluginAPI {
+    root: DocumentNode;
+    currentPage: PageNode;
+
+    constructor() {
+      // @ts-ignore
+      this.root = new DocumentNodeStub();
+      // @ts-ignore
+      this.currentPage = new PageNodeStub();
+      this.root.appendChild(this.currentPage);
+    }
+
+    // @ts-ignore
+    createPage() {
+      const result: any = new PageNodeStub();
+      this.root.appendChild(result);
+      return result;
+    }
+
+    // @ts-ignore
+    createFrame() {
+      const result: any = new FrameNodeStub();
+      this.currentPage.appendChild(result);
+      return result;
     }
     // @ts-ignore
-    child.parent = this;
-    this.children.splice(index, 0, child);
-  }
-  findAll(callback) {
-    if (!this.children) {
-      return [];
+    createComponent() {
+      const result: any = new ComponentNodeStub();
+      this.currentPage.appendChild(result);
+      return result;
     }
-    return this.children.filter(callback);
-  }
-  findOne(callback) {
-    if (!this.children) {
-      return null;
+    // @ts-ignore
+    createRectangle() {
+      const result: any = new RectangleNodeStub();
+      this.currentPage.appendChild(result);
+      return result;
     }
-    return this.children.find(callback);
-  }
-}
-
-class BaseNodeMixinStub implements BaseNodeMixin {
-  id: string;
-  parent: (BaseNode & ChildrenMixin) | null;
-  name: string;
-  removed: boolean;
-  pluginData: { [key: string]: string };
-  sharedPluginData: { [namespace: string]: { [key: string]: string } };
-
-  setPluginData(key: string, value: string) {
-    if (!this.pluginData) {
-      this.pluginData = {};
+    // @ts-ignore
+    createText() {
+      const result: any = new TextNodeStub();
+      this.currentPage.appendChild(result);
+      return result;
     }
-    this.pluginData[key] = value;
-  }
-  getPluginData(key: string) {
-    if (!this.pluginData) {
-      return;
-    }
-    return this.pluginData[key];
-  }
-  setSharedPluginData(namespace: string, key: string, value: string) {
-    if (!this.sharedPluginData) {
-      this.sharedPluginData = {};
-    }
-    if (!this.sharedPluginData[namespace]) {
-      this.sharedPluginData[namespace] = {};
-    }
-    this.pluginData[key] = value;
-  }
-  getSharedPluginData(namespace: string, key: string) {
-    if (!this.sharedPluginData || !this.sharedPluginData[namespace]) {
-      return;
-    }
-    return this.pluginData[namespace][key];
-  }
-  remove() {
-    this.removed = true;
-    if (this.parent) {
-      // @ts-ignore
-      this.parent.children = this.parent.children.filter(
-        (child: any) => child !== this
-      );
+    // @ts-ignore
+    group(nodes: any, parent: any, index) {
+      const group: any = new GroupNodeStub();
+      nodes.forEach(node => group.appendChild(node));
+      if (index) {
+        parent.insertChild(index, group);
+      } else {
+        parent.appendChild(group);
+      }
+      group.parent = parent;
+      return group;
     }
   }
-}
 
-class LayoutMixinStub implements LayoutMixin {
-  absoluteTransform: Transform;
-  relativeTransform: Transform;
-  x: number;
-  y: number;
-  rotation: number;
-
-  width: number;
-  height: number;
-
-  resize(width, height) {
-    this.width = width;
-    this.height = height;
-  }
-  resizeWithoutConstraints(width, height) {
-    this.width = width;
-    this.height = height;
-  }
-}
-
-class RectangleNodeStub {
-  type = "RECTANGLE";
-}
-applyMixins(RectangleNodeStub, [BaseNodeMixinStub, LayoutMixinStub]);
-
-class TextNodeStub {
-  type = "TEXT";
-}
-applyMixins(TextNodeStub, [BaseNodeMixinStub, LayoutMixinStub]);
-
-class DocumentNodeStub {
-  type = "DOCUMENT";
-}
-applyMixins(DocumentNodeStub, [BaseNodeMixinStub, ChildrenMixinStub]);
-
-class PageNodeStub {
-  type = "PAGE";
-}
-applyMixins(PageNodeStub, [BaseNodeMixinStub, ChildrenMixinStub]);
-
-class FrameNodeStub {
-  type = "FRAME";
-}
-applyMixins(FrameNodeStub, [BaseNodeMixinStub, ChildrenMixinStub]);
-
-class GroupNodeStub {
-  type = "GROUP";
-}
-applyMixins(GroupNodeStub, [BaseNodeMixinStub, ChildrenMixinStub]);
-
-class ComponentNodeStub {
-  type = "COMPONENT";
-}
-applyMixins(ComponentNodeStub, [BaseNodeMixinStub, ChildrenMixinStub]);
-
-export const createFigma = (): PluginAPI => ({
   // @ts-ignore
-  root: new DocumentNodeStub(),
-  // @ts-ignore
-  createPage: () => new PageNodeStub(),
-  // @ts-ignore
-  createFrame: () => new FrameNodeStub(),
-  // @ts-ignore
-  createComponent: () => new ComponentNodeStub(),
-  // @ts-ignore
-  createRectangle: () => new RectangleNodeStub(),
-  // @ts-ignore
-  createText: () => new TextNodeStub(),
-  // @ts-ignore
-  group: (nodes: any, parent: any, index) => {
-    const group: any = new GroupNodeStub();
-    nodes.forEach(node => group.appendChild(node));
-    if (index) {
-      parent.insertChild(index, group);
-    } else {
-      parent.appendChild(group);
-    }
-    group.parent = parent;
-    return group;
-  }
-});
+  return new PluginApiStub();
+};
