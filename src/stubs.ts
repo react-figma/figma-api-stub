@@ -23,6 +23,10 @@ export const createFigma = (config: TConfig): PluginAPI => {
         );
       }
 
+      if (joinedConfig.simulateErrors && !item) {
+        throw new Error("Error: empty child");
+      }
+
       if (
         joinedConfig.simulateErrors &&
         // @ts-ignore
@@ -40,6 +44,11 @@ export const createFigma = (config: TConfig): PluginAPI => {
       if (!this.children) {
         this.children = [];
       }
+
+      if (joinedConfig.simulateErrors && !child) {
+        throw new Error("Error: empty child");
+      }
+
       // @ts-ignore
       if (joinedConfig.simulateErrors && child.parent === this) {
         throw new Error("Error: Node already inside parent");
