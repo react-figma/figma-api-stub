@@ -238,6 +238,12 @@ export const createFigma = (config: TConfig): PluginAPI => {
     }
     // @ts-ignore
     group(nodes: any, parent: any, index) {
+      if (joinedConfig.simulateErrors && (!nodes || nodes.length === 0)) {
+        throw new Error(
+          "Error: First argument must be an array of at least one node"
+        );
+      }
+
       const group: any = new GroupNodeStub();
       nodes.forEach(node => group.appendChild(node));
       if (index) {
