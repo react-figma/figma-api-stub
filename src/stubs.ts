@@ -165,16 +165,19 @@ export const createFigma = (config: TConfig): PluginAPI => {
 
   class DocumentNodeStub {
     type = "DOCUMENT";
+    children = [];
   }
   applyMixins(DocumentNodeStub, [BaseNodeMixinStub, ChildrenMixinStub]);
 
   class PageNodeStub {
     type = "PAGE";
+    children = [];
   }
   applyMixins(PageNodeStub, [BaseNodeMixinStub, ChildrenMixinStub]);
 
   class FrameNodeStub {
     type = "FRAME";
+    children = [];
   }
   applyMixins(FrameNodeStub, [BaseNodeMixinStub, ChildrenMixinStub]);
 
@@ -185,6 +188,7 @@ export const createFigma = (config: TConfig): PluginAPI => {
 
   class ComponentNodeStub {
     type = "COMPONENT";
+    children = [];
   }
   applyMixins(ComponentNodeStub, [BaseNodeMixinStub, ChildrenMixinStub]);
 
