@@ -165,16 +165,19 @@ export const createFigma = (config: TConfig): PluginAPI => {
 
   class DocumentNodeStub {
     type = "DOCUMENT";
+    children = [];
   }
   applyMixins(DocumentNodeStub, [BaseNodeMixinStub, ChildrenMixinStub]);
 
   class PageNodeStub {
     type = "PAGE";
+    children = [];
   }
   applyMixins(PageNodeStub, [BaseNodeMixinStub, ChildrenMixinStub]);
 
   class FrameNodeStub {
     type = "FRAME";
+    children = [];
   }
   applyMixins(FrameNodeStub, [BaseNodeMixinStub, ChildrenMixinStub]);
 
@@ -185,6 +188,7 @@ export const createFigma = (config: TConfig): PluginAPI => {
 
   class ComponentNodeStub {
     type = "COMPONENT";
+    children = [];
   }
   applyMixins(ComponentNodeStub, [BaseNodeMixinStub, ChildrenMixinStub]);
 
@@ -234,6 +238,12 @@ export const createFigma = (config: TConfig): PluginAPI => {
     }
     // @ts-ignore
     group(nodes: any, parent: any, index) {
+      if (joinedConfig.simulateErrors && (!nodes || nodes.length === 0)) {
+        throw new Error(
+          "Error: First argument must be an array of at least one node"
+        );
+      }
+
       const group: any = new GroupNodeStub();
       nodes.forEach(node => group.appendChild(node));
       if (index) {
