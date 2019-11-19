@@ -166,14 +166,16 @@ export const createFigma = (config: TConfig): PluginAPI => {
 
   class TextNodeStub {
     type = "TEXT";
+    private _fontName: FontName;
+    private _characters: string;
     get fontName() {
-      return this.fontName || { family: "Roboto", style: "Regular" };
+      return this._fontName || { family: "Roboto", style: "Regular" };
     }
     set fontName(fontName) {
-      this.fontName = fontName;
+      this._fontName = fontName;
     }
     get characters() {
-      return this.characters || "";
+      return this._characters || "";
     }
     set characters(characters) {
       if (joinedConfig.simulateErrors && !isFontLoaded(this.fontName)) {
@@ -181,7 +183,7 @@ export const createFigma = (config: TConfig): PluginAPI => {
           `Error: font is not loaded ${this.fontName.family} ${this.fontName.style}`
         );
       }
-      this.characters = characters;
+      this._characters = characters;
     }
   }
   applyMixins(TextNodeStub, [BaseNodeMixinStub, LayoutMixinStub]);
