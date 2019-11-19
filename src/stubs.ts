@@ -10,6 +10,12 @@ const defaultConfig: TConfig = {
 
 export const createFigma = (config: TConfig): PluginAPI => {
   const joinedConfig = { ...defaultConfig, ...config };
+  const loadedFonts: Array<FontName> = [];
+  const isFontLoaded = fontName => {
+    return loadedFonts.find(
+      font => font.family === fontName.family && font.style === fontName.style
+    );
+  };
 
   class ChildrenMixinStub implements ChildrenMixin {
     children: Array<any>;
@@ -160,6 +166,23 @@ export const createFigma = (config: TConfig): PluginAPI => {
 
   class TextNodeStub {
     type = "TEXT";
+    get fontName() {
+      return this.fontName || { family: "Roboto", style: "Regular" };
+    }
+    set fontName(fontName) {
+      this.fontName = fontName;
+    }
+    get characters() {
+      return this.characters || "";
+    }
+    set characters(characters) {
+      if (joinedConfig.simulateErrors && !isFontLoaded(this.fontName)) {
+        throw new Error(
+          `Error: font is not loaded ${this.fontName.family} ${this.fontName.style}`
+        );
+      }
+      this.characters = characters;
+    }
   }
   applyMixins(TextNodeStub, [BaseNodeMixinStub, LayoutMixinStub]);
 
@@ -253,6 +276,16 @@ export const createFigma = (config: TConfig): PluginAPI => {
       }
       group.parent = parent;
       return group;
+    }
+    // @ts-ignore
+    loadFontAsync(fontName) {
+      if (isFontLoaded(fontName)) {
+        return;
+      }
+      return new Promise(resolve => {
+        loadedFonts.push(fontName);
+        resolve();
+      });
     }
   }
 
