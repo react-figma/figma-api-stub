@@ -172,6 +172,9 @@ export const createFigma = (config: TConfig): PluginAPI => {
       return this._fontName || { family: "Roboto", style: "Regular" };
     }
     set fontName(fontName) {
+      if (joinedConfig.simulateErrors && !fontName) {
+        throw new Error(`Error: fontName is undefined`);
+      }
       this._fontName = fontName;
     }
     get characters() {
