@@ -28,8 +28,10 @@ export const createFigma = (config: TConfig): PluginAPI => {
 
       // @ts-ignore
       if (global && global.onmessage) {
-        // @ts-ignore
-        global.onmessage(message);
+        setTimeout(() => {
+          // @ts-ignore
+          global.onmessage(message);
+        }, 0);
       }
     }
   }
@@ -343,6 +345,9 @@ export const createParentPostMessage = (figma: PluginAPI) => (
   target: string
 ) => {
   if (figma.ui.onmessage) {
-    figma.ui.onmessage(message.pluginMessage, { origin: null });
+    setTimeout(() => {
+      // @ts-ignore
+      figma.ui.onmessage(message.pluginMessage, { origin: null });
+    }, 0);
   }
 };
