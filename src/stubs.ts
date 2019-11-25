@@ -11,8 +11,26 @@ const defaultConfig: TConfig = {
 export const createFigma = (config: TConfig): PluginAPI => {
   const joinedConfig = { ...defaultConfig, ...config };
 
+  class UIAPIStub {
+    onmessage: MessageEventHandler | undefined;
+
+    postMessage(pluginMessage: any, options?: UIPostMessageOptions): void {
+      const message = {
+        data: { pluginMessage, pluginId: "000000000000000000" },
+        type: "message"
+      };
+
+      // @ts-ignore
+      if (global && global.onmessage) {
+        // @ts-ignore
+        global.onmessage(message);
+      }
+    }
+  }
+
   class ChildrenMixinStub implements ChildrenMixin {
     children: Array<any>;
+
     appendChild(item) {
       if (!this.children) {
         this.children = [];
@@ -40,6 +58,7 @@ export const createFigma = (config: TConfig): PluginAPI => {
       item.parent = this;
       this.children.push(item);
     }
+
     insertChild(index: number, child: any) {
       if (!this.children) {
         this.children = [];
@@ -73,12 +92,14 @@ export const createFigma = (config: TConfig): PluginAPI => {
       child.parent = this;
       this.children.splice(index, 0, child);
     }
+
     findAll(callback) {
       if (!this.children) {
         return [];
       }
       return this.children.filter(callback);
     }
+
     findOne(callback) {
       if (!this.children) {
         return null;
@@ -101,12 +122,14 @@ export const createFigma = (config: TConfig): PluginAPI => {
       }
       this.pluginData[key] = value;
     }
+
     getPluginData(key: string) {
       if (!this.pluginData) {
         return;
       }
       return this.pluginData[key];
     }
+
     setSharedPluginData(namespace: string, key: string, value: string) {
       if (!this.sharedPluginData) {
         this.sharedPluginData = {};
@@ -116,12 +139,14 @@ export const createFigma = (config: TConfig): PluginAPI => {
       }
       this.pluginData[key] = value;
     }
+
     getSharedPluginData(namespace: string, key: string) {
       if (!this.sharedPluginData || !this.sharedPluginData[namespace]) {
         return;
       }
       return this.pluginData[namespace][key];
     }
+
     remove() {
       this.removed = true;
       if (this.parent) {
@@ -147,6 +172,7 @@ export const createFigma = (config: TConfig): PluginAPI => {
       this.width = width;
       this.height = height;
     }
+
     resizeWithoutConstraints(width, height) {
       this.width = width;
       this.height = height;
@@ -156,46 +182,54 @@ export const createFigma = (config: TConfig): PluginAPI => {
   class RectangleNodeStub {
     type = "RECTANGLE";
   }
+
   applyMixins(RectangleNodeStub, [BaseNodeMixinStub, LayoutMixinStub]);
 
   class TextNodeStub {
     type = "TEXT";
   }
+
   applyMixins(TextNodeStub, [BaseNodeMixinStub, LayoutMixinStub]);
 
   class DocumentNodeStub {
     type = "DOCUMENT";
     children = [];
   }
+
   applyMixins(DocumentNodeStub, [BaseNodeMixinStub, ChildrenMixinStub]);
 
   class PageNodeStub {
     type = "PAGE";
     children = [];
   }
+
   applyMixins(PageNodeStub, [BaseNodeMixinStub, ChildrenMixinStub]);
 
   class FrameNodeStub {
     type = "FRAME";
     children = [];
   }
+
   applyMixins(FrameNodeStub, [BaseNodeMixinStub, ChildrenMixinStub]);
 
   class GroupNodeStub {
     type = "GROUP";
   }
+
   applyMixins(GroupNodeStub, [BaseNodeMixinStub, ChildrenMixinStub]);
 
   class ComponentNodeStub {
     type = "COMPONENT";
     children = [];
   }
+
   applyMixins(ComponentNodeStub, [BaseNodeMixinStub, ChildrenMixinStub]);
 
   // @ts-ignore
   class PluginApiStub implements PluginAPI {
     root: DocumentNode;
     currentPage: PageNode;
+    readonly ui: UIAPI;
 
     constructor() {
       // @ts-ignore
@@ -203,6 +237,8 @@ export const createFigma = (config: TConfig): PluginAPI => {
       // @ts-ignore
       this.currentPage = new PageNodeStub();
       this.root.appendChild(this.currentPage);
+      // @ts-ignore
+      this.ui = new UIAPIStub();
     }
 
     // @ts-ignore
@@ -218,24 +254,28 @@ export const createFigma = (config: TConfig): PluginAPI => {
       this.currentPage.appendChild(result);
       return result;
     }
+
     // @ts-ignore
     createComponent() {
       const result: any = new ComponentNodeStub();
       this.currentPage.appendChild(result);
       return result;
     }
+
     // @ts-ignore
     createRectangle() {
       const result: any = new RectangleNodeStub();
       this.currentPage.appendChild(result);
       return result;
     }
+
     // @ts-ignore
     createText() {
       const result: any = new TextNodeStub();
       this.currentPage.appendChild(result);
       return result;
     }
+
     // @ts-ignore
     group(nodes: any, parent: any, index) {
       if (joinedConfig.simulateErrors && (!nodes || nodes.length === 0)) {
@@ -258,4 +298,13 @@ export const createFigma = (config: TConfig): PluginAPI => {
 
   // @ts-ignore
   return new PluginApiStub();
+};
+
+export const createParentPostMessage = (figma: PluginAPI) => (
+  message: { pluginMessage: any },
+  target: string
+) => {
+  if (figma.ui.onmessage) {
+    figma.ui.onmessage(message.pluginMessage, { origin: null });
+  }
 };
