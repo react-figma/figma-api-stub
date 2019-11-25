@@ -1,1 +1,1 @@
-export { createFigma } from "./stubs";
+export { createFigma, createParentPostMessage } from "./stubs";
