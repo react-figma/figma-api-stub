@@ -177,6 +177,16 @@ export const createFigma = (config: TConfig): PluginAPI => {
     height: number;
 
     resize(width, height) {
+      if (joinedConfig.simulateErrors && width < 0.01) {
+        throw new Error(
+          'Error: in resize: Expected "width" to have value >= 0.01'
+        );
+      }
+      if (joinedConfig.simulateErrors && height < 0.01) {
+        throw new Error(
+          'Error: in resize: Expected "height" to have value >= 0.01'
+        );
+      }
       this.width = width;
       this.height = height;
     }
