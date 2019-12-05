@@ -207,6 +207,7 @@ export const createFigma = (config: TConfig): PluginAPI => {
     type = "TEXT";
     private _fontName: FontName;
     private _characters: string;
+    private _textAutoResize: string;
     get fontName() {
       return this._fontName || { family: "Roboto", style: "Regular" };
     }
@@ -226,6 +227,17 @@ export const createFigma = (config: TConfig): PluginAPI => {
         );
       }
       this._characters = characters;
+    }
+    get textAutoResize() {
+      return this._textAutoResize;
+    }
+    set textAutoResize(value) {
+      if (joinedConfig.simulateErrors && !isFontLoaded(this.fontName)) {
+        throw new Error(
+          `Error: font is not loaded ${this.fontName.family} ${this.fontName.style}`
+        );
+      }
+      this._textAutoResize = value;
     }
   }
 
