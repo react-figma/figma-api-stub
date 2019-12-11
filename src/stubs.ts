@@ -276,7 +276,7 @@ export const createFigma = (config: TConfig): PluginAPI => {
     createInstance() {
       const instance = new InstanceNodeStub();
       instance.children = this.children;
-      return;
+      return instance;
     }
   }
 
