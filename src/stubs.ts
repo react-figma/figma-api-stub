@@ -288,7 +288,7 @@ export const createFigma = (config: TConfig): PluginAPI => {
     children = [];
     createInstance() {
       const instance = new InstanceNodeStub();
-      instance.children = this.children;
+      instance.children = JSON.parse(JSON.stringify(this.children));
       return instance;
     }
   }
