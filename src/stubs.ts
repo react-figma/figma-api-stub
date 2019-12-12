@@ -1,3 +1,4 @@
+import _ from "lodash";
 import { applyMixins } from "./applyMixins";
 
 type TConfig = {
@@ -288,7 +289,7 @@ export const createFigma = (config: TConfig): PluginAPI => {
     children = [];
     createInstance() {
       const instance = new InstanceNodeStub();
-      instance.children = JSON.parse(JSON.stringify(this.children));
+      instance.children = _.cloneDeep(this.children);
       return instance;
     }
   }
