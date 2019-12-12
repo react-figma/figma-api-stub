@@ -8,6 +8,13 @@ const defaultConfig: TConfig = {
   simulateErrors: false
 };
 
+const isInsideInstance = node => {
+  if (!node.parent) {
+    return;
+  }
+  return node.parent.type === "INSTANCE" || isInsideInstance(node.parent);
+};
+
 export const createFigma = (config: TConfig): PluginAPI => {
   const joinedConfig = { ...defaultConfig, ...config };
   const loadedFonts: Array<FontName> = [];
@@ -157,6 +164,9 @@ export const createFigma = (config: TConfig): PluginAPI => {
 
     remove() {
       this.removed = true;
+      if (joinedConfig.simulateErrors && isInsideInstance(this)) {
+        throw new Error("Error: can't remove item");
+      }
       if (this.parent) {
         // @ts-ignore
         this.parent.children = this.parent.children.filter(
@@ -177,6 +187,9 @@ export const createFigma = (config: TConfig): PluginAPI => {
     height: number;
 
     resize(width, height) {
+      if (joinedConfig.simulateErrors && isInsideInstance(this)) {
+        throw new Error("Error: can't change layout inside item");
+      }
       if (joinedConfig.simulateErrors && width < 0.01) {
         throw new Error(
           'Error: in resize: Expected "width" to have value >= 0.01'
