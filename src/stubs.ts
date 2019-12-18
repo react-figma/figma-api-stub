@@ -18,10 +18,6 @@ const isInsideInstance = node => {
   return node.parent.type === "INSTANCE" || isInsideInstance(node.parent);
 };
 
-const selectionChangeSubject = new Subject();
-
-const selectionChangeSubscribes = new Map<Function, Subscription>();
-
 export const createFigma = (config: TConfig): PluginAPI => {
   const joinedConfig = { ...defaultConfig, ...config };
   const loadedFonts: Array<FontName> = [];
@@ -30,6 +26,10 @@ export const createFigma = (config: TConfig): PluginAPI => {
       font => font.family === fontName.family && font.style === fontName.style
     );
   };
+
+  const selectionChangeSubject = new Subject();
+
+  const selectionChangeSubscribes = new Map<Function, Subscription>();
 
   class UIAPIStub {
     onmessage: MessageEventHandler | undefined;
