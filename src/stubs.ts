@@ -1,5 +1,7 @@
 import * as _ from "lodash";
 import { applyMixins } from "./applyMixins";
+import { Subject, Subscription } from "rxjs";
+import { take } from "rxjs/operators";
 
 type TConfig = {
   simulateErrors?: boolean;
@@ -15,6 +17,10 @@ const isInsideInstance = node => {
   }
   return node.parent.type === "INSTANCE" || isInsideInstance(node.parent);
 };
+
+const selectionChangeSubject = new Subject();
+
+const selectionChangeSubscribes = new Map<Function, Subscription>();
 
 export const createFigma = (config: TConfig): PluginAPI => {
   const joinedConfig = { ...defaultConfig, ...config };
@@ -267,6 +273,16 @@ export const createFigma = (config: TConfig): PluginAPI => {
   class PageNodeStub {
     type = "PAGE";
     children = [];
+    _selection: Array<SceneNode>;
+
+    get selection() {
+      return this._selection || [];
+    }
+
+    set selection(value) {
+      this._selection = value;
+      selectionChangeSubject.next();
+    }
   }
 
   applyMixins(PageNodeStub, [BaseNodeMixinStub, ChildrenMixinStub]);
@@ -381,6 +397,39 @@ export const createFigma = (config: TConfig): PluginAPI => {
         loadedFonts.push(fontName);
         resolve();
       });
+    }
+
+    on(
+      type: "selectionchange" | "currentpagechange" | "close",
+      callback: () => void
+    ) {
+      if (type === "selectionchange") {
+        selectionChangeSubscribes.set(
+          callback,
+          selectionChangeSubject.subscribe(callback)
+        );
+      }
+    }
+
+    once(
+      type: "selectionchange" | "currentpagechange" | "close",
+      callback: () => void
+    ) {
+      if (type === "selectionchange") {
+        selectionChangeSubscribes.set(
+          callback,
+          selectionChangeSubject.pipe(take(1)).subscribe(callback)
+        );
+      }
+    }
+
+    off(
+      type: "selectionchange" | "currentpagechange" | "close",
+      callback: () => void
+    ) {
+      if (type === "selectionchange") {
+        selectionChangeSubscribes.get(callback).unsubscribe();
+      }
     }
   }
 
