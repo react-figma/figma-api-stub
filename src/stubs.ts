@@ -28,8 +28,10 @@ export const createFigma = (config: TConfig): PluginAPI => {
   };
 
   const selectionChangeSubject = new Subject();
-
   const selectionChangeSubscribes = new Map<Function, Subscription>();
+
+  const currentPageChangeSubject = new Subject();
+  const currentPageChangeSubscribes = new Map<Function, Subscription>();
 
   class UIAPIStub {
     onmessage: MessageEventHandler | undefined;
@@ -322,7 +324,7 @@ export const createFigma = (config: TConfig): PluginAPI => {
   // @ts-ignore
   class PluginApiStub implements PluginAPI {
     root: DocumentNode;
-    currentPage: PageNode;
+    _currentPage: PageNode;
     readonly ui: UIAPI;
 
     constructor() {
@@ -333,6 +335,15 @@ export const createFigma = (config: TConfig): PluginAPI => {
       this.root.appendChild(this.currentPage);
       // @ts-ignore
       this.ui = new UIAPIStub();
+    }
+
+    get currentPage() {
+      return this._currentPage;
+    }
+
+    set currentPage(value) {
+      currentPageChangeSubject.next();
+      this._currentPage = value;
     }
 
     // @ts-ignore
@@ -409,6 +420,12 @@ export const createFigma = (config: TConfig): PluginAPI => {
           selectionChangeSubject.subscribe(callback)
         );
       }
+      if (type === "currentpagechange") {
+        currentPageChangeSubscribes.set(
+          callback,
+          currentPageChangeSubject.subscribe(callback)
+        );
+      }
     }
 
     once(
@@ -421,6 +438,12 @@ export const createFigma = (config: TConfig): PluginAPI => {
           selectionChangeSubject.pipe(take(1)).subscribe(callback)
         );
       }
+      if (type === "currentpagechange") {
+        currentPageChangeSubscribes.set(
+          callback,
+          currentPageChangeSubject.pipe(take(1)).subscribe(callback)
+        );
+      }
     }
 
     off(
@@ -429,6 +452,9 @@ export const createFigma = (config: TConfig): PluginAPI => {
     ) {
       if (type === "selectionchange") {
         selectionChangeSubscribes.get(callback).unsubscribe();
+      }
+      if (type === "currentpagechange") {
+        currentPageChangeSubscribes.get(callback).unsubscribe();
       }
     }
   }
