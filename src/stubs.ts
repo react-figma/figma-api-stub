@@ -331,8 +331,8 @@ export const createFigma = (config: TConfig): PluginAPI => {
       // @ts-ignore
       this.root = new DocumentNodeStub();
       // @ts-ignore
-      this.currentPage = new PageNodeStub();
-      this.root.appendChild(this.currentPage);
+      this._currentPage = new PageNodeStub();
+      this.root.appendChild(this._currentPage);
       // @ts-ignore
       this.ui = new UIAPIStub();
     }
@@ -342,8 +342,8 @@ export const createFigma = (config: TConfig): PluginAPI => {
     }
 
     set currentPage(value) {
-      currentPageChangeSubject.next();
       this._currentPage = value;
+      currentPageChangeSubject.next();
     }
 
     // @ts-ignore
