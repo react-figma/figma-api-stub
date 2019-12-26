@@ -2,6 +2,7 @@ import * as _ from "lodash";
 import { applyMixins } from "./applyMixins";
 import { Subject, Subscription } from "rxjs";
 import { take } from "rxjs/operators";
+import { Helvetica, Roboto } from "./fonts";
 
 type TConfig = {
   simulateErrors?: boolean;
@@ -408,6 +409,10 @@ export const createFigma = (config: TConfig): PluginAPI => {
         loadedFonts.push(fontName);
         resolve();
       });
+    }
+
+    listAvailableFontsAsync(): Promise<Font[]> {
+      return Promise.resolve([...Roboto, ...Helvetica]);
     }
 
     on(
