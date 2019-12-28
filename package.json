@@ -41,11 +41,11 @@
     "pre-commit": "^1.2.2",
     "prettier": "^1.18.2",
     "rimraf": "^3.0.0",
-    "rxjs": "^6.5.3",
     "ts-jest": "^24.2.0",
     "typescript": "3.5.3"
   },
   "dependencies": {
-    "lodash": "^4.17.15"
+    "lodash": "^4.17.15",
+    "rxjs": "^6.5.3"
   }
 }
