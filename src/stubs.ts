@@ -1,7 +1,7 @@
-import * as _ from "lodash";
-import { applyMixins } from "./applyMixins";
+import cloneDeep from "clone-deep";
 import { Subject, Subscription } from "rxjs";
 import { take } from "rxjs/operators";
+import { applyMixins } from "./applyMixins";
 import { Helvetica, Roboto } from "./fonts";
 
 type TConfig = {
@@ -308,7 +308,7 @@ export const createFigma = (config: TConfig): PluginAPI => {
     children = [];
     createInstance() {
       const instance = new InstanceNodeStub();
-      instance.children = _.cloneDeep(this.children);
+      instance.children = cloneDeep(this.children);
       return instance;
     }
   }
