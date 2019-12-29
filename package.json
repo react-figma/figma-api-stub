@@ -45,7 +45,7 @@
     "typescript": "3.5.3"
   },
   "dependencies": {
-    "lodash": "^4.17.15",
+    "clone-deep": "^4.0.1",
     "rxjs": "^6.5.3"
   }
 }
