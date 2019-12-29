@@ -45,7 +45,7 @@
     "typescript": "3.5.3"
   },
   "dependencies": {
-    "clone-deep": "^4.0.1"
+    "clone-deep": "^4.0.1",
     "rxjs": "^6.5.3"
   }
 }
