@@ -295,7 +295,11 @@ export const createFigma = (config: TConfig): PluginAPI => {
     children = [];
   }
 
-  applyMixins(FrameNodeStub, [BaseNodeMixinStub, ChildrenMixinStub]);
+  applyMixins(FrameNodeStub, [
+    BaseNodeMixinStub,
+    ChildrenMixinStub,
+    LayoutMixinStub
+  ]);
 
   class GroupNodeStub {
     type = "GROUP";
