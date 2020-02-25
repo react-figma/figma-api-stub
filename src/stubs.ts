@@ -6,10 +6,12 @@ import { Helvetica, Roboto } from "./fonts";
 
 type TConfig = {
   simulateErrors?: boolean;
+  isWithoutTimeout?: boolean;
 };
 
 const defaultConfig: TConfig = {
-  simulateErrors: false
+  simulateErrors: false,
+  isWithoutTimeout: false
 };
 
 const isInsideInstance = node => {
@@ -45,10 +47,15 @@ export const createFigma = (config: TConfig): PluginAPI => {
 
       // @ts-ignore
       if (global && global.onmessage) {
-        setTimeout(() => {
+        if (config.isWithoutTimeout) {
           // @ts-ignore
           global.onmessage(message);
-        }, 0);
+        } else {
+          setTimeout(() => {
+            // @ts-ignore
+            global.onmessage(message);
+          }, 0);
+        }
       }
     }
   }
@@ -472,14 +479,19 @@ export const createFigma = (config: TConfig): PluginAPI => {
   return new PluginApiStub();
 };
 
-export const createParentPostMessage = (figma: PluginAPI) => (
-  message: { pluginMessage: any },
-  target: string
-) => {
+export const createParentPostMessage = (
+  figma: PluginAPI,
+  isWithoutTimeout?: boolean
+) => (message: { pluginMessage: any }, target: string) => {
   if (figma.ui.onmessage) {
-    setTimeout(() => {
+    const call = () => {
       // @ts-ignore
       figma.ui.onmessage(message.pluginMessage, { origin: null });
-    }, 0);
+    };
+    if (isWithoutTimeout) {
+      call();
+    } else {
+      setTimeout(call, 0);
+    }
   }
 };
