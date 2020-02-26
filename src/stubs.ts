@@ -1,4 +1,4 @@
-import cloneDeep from "clone-deep";
+import * as cloneDeep from "clone-deep";
 import { Subject, Subscription } from "rxjs";
 import { take } from "rxjs/operators";
 import { applyMixins } from "./applyMixins";
