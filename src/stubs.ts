@@ -473,6 +473,21 @@ export const createFigma = (config: TConfig): PluginAPI => {
         currentPageChangeSubscribes.get(callback).unsubscribe();
       }
     }
+
+    getNodeById(id) {
+      const _genNodeById = (nodes, id) => {
+        for (const node of nodes) {
+          if (node.id === id) {
+            return node;
+          }
+          const childMatch = node.children && _genNodeById(node.children, id);
+          if (childMatch) {
+            return childMatch;
+          }
+        }
+      };
+      return _genNodeById([figma.root], id) || null;
+    }
   }
 
   // @ts-ignore
