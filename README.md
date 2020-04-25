@@ -12,6 +12,11 @@ const rect = figma.createRectangle();
 rect.resize(100, 200);
 ```
 
+---
+⚠️ Warning! It's not official implementation and it hasn't purpose to fully reproduce Figma behavior and API.
+
+---
+
 ## Installation
 
 Install it with yarn:
