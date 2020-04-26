@@ -9,7 +9,7 @@
     "build": "npm run build:clean && npm run build:lib",
     "build:clean": "rimraf dist",
     "build:lib": "cross-env BABEL_ENV=production tsc -p tsconfig.json",
-    "prepublish": "npm run build",
+    "prepublishOnly": "npm run build",
     "test": "jest"
   },
   "jest": {
