@@ -36,11 +36,21 @@ export const createFigma = (config: TConfig): PluginAPI => {
   const currentPageChangeSubject = new Subject();
   const currentPageChangeSubscribes = new Map<Function, Subscription>();
 
-  let lastId = 1;
-  const allocateId = node => {
-    lastId += 1;
-    node.id = `1:${lastId}`;
+  let majorId = 0;
+  const minorIds = {};
+  const allocateId = (
+    node,
+    majorVersion?: number | string,
+    minorVersion?: number | string
+  ) => {
+    const major = majorVersion === undefined ? majorId : majorVersion;
+    const minor =
+      minorVersion === undefined ? (minorIds[major] || 1) + 1 : minorVersion;
+    minorIds[major] = minor;
+    node.id = `${major}:${minor}`;
   };
+
+  const getMajorId = node => Math.max(node.id.split(":")[0], 1);
 
   class UIAPIStub {
     onmessage: MessageEventHandler | undefined;
@@ -371,7 +381,8 @@ export const createFigma = (config: TConfig): PluginAPI => {
     // @ts-ignore
     createPage() {
       const result: any = new PageNodeStub();
-      allocateId(result);
+      majorId += 1;
+      allocateId(result, undefined, 1);
       this.root.appendChild(result);
       return result;
     }
@@ -379,7 +390,7 @@ export const createFigma = (config: TConfig): PluginAPI => {
     // @ts-ignore
     createFrame() {
       const result: any = new FrameNodeStub();
-      allocateId(result);
+      allocateId(result, getMajorId(this.currentPage));
       this.currentPage.appendChild(result);
       return result;
     }
@@ -387,7 +398,7 @@ export const createFigma = (config: TConfig): PluginAPI => {
     // @ts-ignore
     createComponent() {
       const result: any = new ComponentNodeStub();
-      allocateId(result);
+      allocateId(result, getMajorId(this.currentPage));
       this.currentPage.appendChild(result);
       return result;
     }
@@ -395,7 +406,7 @@ export const createFigma = (config: TConfig): PluginAPI => {
     // @ts-ignore
     createRectangle() {
       const result: any = new RectangleNodeStub();
-      allocateId(result);
+      allocateId(result, getMajorId(this.currentPage));
       this.currentPage.appendChild(result);
       return result;
     }
@@ -403,7 +414,7 @@ export const createFigma = (config: TConfig): PluginAPI => {
     // @ts-ignore
     createText() {
       const result: any = new TextNodeStub();
-      allocateId(result);
+      allocateId(result, getMajorId(this.currentPage));
       this.currentPage.appendChild(result);
       return result;
     }
@@ -417,7 +428,7 @@ export const createFigma = (config: TConfig): PluginAPI => {
       }
 
       const group: any = new GroupNodeStub();
-      allocateId(group);
+      allocateId(group, getMajorId(this.currentPage));
       nodes.forEach(node => group.appendChild(node));
       if (index) {
         parent.insertChild(index, group);

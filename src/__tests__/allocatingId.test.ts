@@ -14,4 +14,15 @@ describe("allocating id", () => {
     expect(rect1.id).toEqual("1:2");
     expect(rect2.id).toEqual("1:3");
   });
+
+  it("page ids increment", () => {
+    const page1 = figma.currentPage;
+    const page2 = figma.createPage();
+    const page3 = figma.createPage();
+    const page4 = figma.createPage();
+    expect(page1.id).toEqual("0:1");
+    expect(page2.id).toEqual("1:1");
+    expect(page3.id).toEqual("2:1");
+    expect(page4.id).toEqual("3:1");
+  });
 });
