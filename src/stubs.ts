@@ -243,11 +243,24 @@ export const createFigma = (config: TConfig): PluginAPI => {
     }
   }
 
+  class ExportMixinStub implements ExportMixin {
+    exportSettings: ReadonlyArray<ExportSettings>;
+
+    exportAsync(settings?: ExportSettings) {
+      // "exportAsync" is not implemented in stubs
+      return Promise.resolve(new Uint8Array());
+    }
+  }
+
   class RectangleNodeStub {
     type = "RECTANGLE";
   }
 
-  applyMixins(RectangleNodeStub, [BaseNodeMixinStub, LayoutMixinStub]);
+  applyMixins(RectangleNodeStub, [
+    BaseNodeMixinStub,
+    LayoutMixinStub,
+    ExportMixinStub
+  ]);
 
   class TextNodeStub {
     type = "TEXT";
@@ -287,7 +300,11 @@ export const createFigma = (config: TConfig): PluginAPI => {
     }
   }
 
-  applyMixins(TextNodeStub, [BaseNodeMixinStub, LayoutMixinStub]);
+  applyMixins(TextNodeStub, [
+    BaseNodeMixinStub,
+    LayoutMixinStub,
+    ExportMixinStub
+  ]);
 
   class DocumentNodeStub {
     type = "DOCUMENT";
@@ -311,7 +328,11 @@ export const createFigma = (config: TConfig): PluginAPI => {
     }
   }
 
-  applyMixins(PageNodeStub, [BaseNodeMixinStub, ChildrenMixinStub]);
+  applyMixins(PageNodeStub, [
+    BaseNodeMixinStub,
+    ChildrenMixinStub,
+    ExportMixinStub
+  ]);
 
   class FrameNodeStub {
     type = "FRAME";
@@ -321,14 +342,19 @@ export const createFigma = (config: TConfig): PluginAPI => {
   applyMixins(FrameNodeStub, [
     BaseNodeMixinStub,
     ChildrenMixinStub,
-    LayoutMixinStub
+    LayoutMixinStub,
+    ExportMixinStub
   ]);
 
   class GroupNodeStub {
     type = "GROUP";
   }
 
-  applyMixins(GroupNodeStub, [BaseNodeMixinStub, ChildrenMixinStub]);
+  applyMixins(GroupNodeStub, [
+    BaseNodeMixinStub,
+    ChildrenMixinStub,
+    ExportMixinStub
+  ]);
 
   class ComponentNodeStub {
     type = "COMPONENT";
@@ -340,14 +366,18 @@ export const createFigma = (config: TConfig): PluginAPI => {
     }
   }
 
-  applyMixins(ComponentNodeStub, [BaseNodeMixinStub, ChildrenMixinStub]);
+  applyMixins(ComponentNodeStub, [
+    BaseNodeMixinStub,
+    ChildrenMixinStub,
+    ExportMixinStub
+  ]);
 
   class InstanceNodeStub {
     type = "INSTANCE";
     children: any;
   }
 
-  applyMixins(InstanceNodeStub, [BaseNodeMixinStub]);
+  applyMixins(InstanceNodeStub, [BaseNodeMixinStub, ExportMixinStub]);
 
   // @ts-ignore
   class PluginApiStub implements PluginAPI {
