@@ -154,6 +154,20 @@ export const createFigma = (config: TConfig): PluginAPI => {
       }
       return this.children.find(callback);
     }
+
+    findChild(callback) {
+      if (!this.children) {
+        return null;
+      }
+      return this.children.find(callback);
+    }
+
+    findChildren(callback) {
+      if (!this.children) {
+        return null;
+      }
+      return this.children.find(callback);
+    }
   }
 
   class BaseNodeMixinStub implements BaseNodeMixin {
@@ -195,6 +209,11 @@ export const createFigma = (config: TConfig): PluginAPI => {
       return this.pluginData[namespace][key];
     }
 
+    setRelaunchData(data) {
+      // TODO: Implement this method
+      console.warn('"setRelaunchData" is not implemented. Skipped', data);
+    }
+
     remove() {
       this.removed = true;
       if (joinedConfig.simulateErrors && isInsideInstance(this)) {
@@ -218,6 +237,9 @@ export const createFigma = (config: TConfig): PluginAPI => {
 
     width: number;
     height: number;
+
+    constrainProportions: boolean;
+    layoutAlign: LayoutMixin["layoutAlign"];
 
     resize(width, height) {
       if (joinedConfig.simulateErrors && isInsideInstance(this)) {
