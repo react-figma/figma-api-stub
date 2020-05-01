@@ -397,7 +397,11 @@ export const createFigma = (config: TConfig): PluginAPI => {
     children: any;
   }
 
-  applyMixins(InstanceNodeStub, [BaseNodeMixinStub, ExportMixinStub]);
+  applyMixins(InstanceNodeStub, [
+    BaseNodeMixinStub,
+    ExportMixinStub,
+    LayoutMixinStub
+  ]);
 
   // @ts-ignore
   class PluginApiStub implements PluginAPI {
