@@ -560,6 +560,18 @@ export const createFigma = (config: TConfig): PluginAPI => {
       return paintStyles;
     }
 
+    getLocalEffectStyles() {
+      return effectStyles;
+    }
+
+    getLocalTextStyles() {
+      return textStyles;
+    }
+
+    getLocalGridStyles() {
+      return gridStyles;
+    }
+
     // @ts-ignore
     createPaintStyle() {
       const style = new PaintStyleStub();
