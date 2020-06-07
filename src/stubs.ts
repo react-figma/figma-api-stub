@@ -195,14 +195,14 @@ export const createFigma = (config: TConfig): PluginAPI => {
       if (!this.sharedPluginData[namespace]) {
         this.sharedPluginData[namespace] = {};
       }
-      this.pluginData[key] = value;
+      this.sharedPluginData[namespace][key] = value;
     }
 
     getSharedPluginData(namespace: string, key: string) {
       if (!this.sharedPluginData || !this.sharedPluginData[namespace]) {
         return;
       }
-      return this.pluginData[namespace][key];
+      return this.sharedPluginData[namespace][key];
     }
 
     setRelaunchData(data) {
@@ -403,6 +403,37 @@ export const createFigma = (config: TConfig): PluginAPI => {
     LayoutMixinStub
   ]);
 
+  class BaseStyleStub implements BaseStyle {
+    id: string;
+    type: StyleType;
+    name: string;
+    description: string;
+    remote: boolean = false;
+    key: string;
+
+    remove(): void {
+      styles.delete(this.id);
+    }
+
+    async getPublishStatusAsync(): Promise<PublishStatus> {
+      return await "UNPUBLISHED";
+    }
+  }
+
+  class PaintStyleStub extends BaseStyleStub implements PaintStyle {
+    // @ts-ignore
+    type = "PAINT" as StyleType;
+    paints: readonly Paint[];
+
+    remove() {
+      super.remove();
+      paintStyles.splice(paintStyles.indexOf(this), 1);
+    }
+  }
+
+  const styles = new Map<string, BaseStyle>();
+  const paintStyles = [];
+
   // @ts-ignore
   class PluginApiStub implements PluginAPI {
     root: DocumentNode;
@@ -470,6 +501,27 @@ export const createFigma = (config: TConfig): PluginAPI => {
       allocateId(result);
       this.currentPage.appendChild(result);
       return result;
+    }
+
+    getStyleById(id) {
+      if (styles.has(id)) {
+        return styles.get(id);
+      }
+
+      return null;
+    }
+
+    getLocalPaintStyles() {
+      return paintStyles;
+    }
+
+    // @ts-ignore
+    createPaintStyle() {
+      const style = new PaintStyleStub();
+      allocateId(style);
+      styles.set(style.id, style);
+      paintStyles.push(style);
+      return style;
     }
 
     // @ts-ignore

@@ -138,10 +138,10 @@
     exec-sh "^0.3.2"
     minimist "^1.2.0"
 
-"@figma-plugin/types@^1.14.0":
-  version "1.14.0"
-  resolved "https://registry.yarnpkg.com/@figma-plugin/types/-/types-1.14.0.tgz#6a320312211b7fb2086976ad096d8ac2ead67597"
-  integrity sha512-Go/mtM4Cozr/RdUJZHi1IySm5faEmo4bXiNCHEbYJu+dSqYuDouL+Wxg0mqOznJ0yzETJlck7QJ7VvYqJbjPrQ==
+"@figma/plugin-typings@^1.15.0":
+  version "1.15.0"
+  resolved "https://registry.yarnpkg.com/@figma/plugin-typings/-/plugin-typings-1.15.0.tgz#7563639f2ee44b118a136be78d754fa2cc4f3ede"
+  integrity sha512-Lr6QShIKlQNW9qdnneGr5+TIXH+EvapyfDvaaZHj7rACqIEslkZmH1mV4AmQHEs9FK5rqJMmKfSkNUNM2fztPg==
 
 "@jest/console@^24.7.1", "@jest/console@^24.9.0":
   version "24.9.0"
