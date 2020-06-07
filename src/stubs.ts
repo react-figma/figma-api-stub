@@ -403,6 +403,14 @@ export const createFigma = (config: TConfig): PluginAPI => {
     LayoutMixinStub
   ]);
 
+  // --- styles
+
+  const styles = new Map<string, BaseStyle>();
+  const paintStyles = [];
+  const effectStyles = [];
+  const textStyles = [];
+  const gridStyles = [];
+
   class BaseStyleStub implements BaseStyle {
     id: string;
     type: StyleType;
@@ -431,8 +439,45 @@ export const createFigma = (config: TConfig): PluginAPI => {
     }
   }
 
-  const styles = new Map<string, BaseStyle>();
-  const paintStyles = [];
+  class EffectStyleStub extends BaseStyleStub implements EffectStyle {
+    // @ts-ignore
+    type = "EFFECT" as StyleType;
+    effects: readonly Effect[];
+
+    remove() {
+      super.remove();
+      effectStyles.splice(effectStyles.indexOf(this), 1);
+    }
+  }
+
+  class TextStyleStub extends BaseStyleStub implements TextStyle {
+    // @ts-ignore
+    type = "TEXT" as StyleType;
+    fontName: FontName;
+    fontSize: number;
+    letterSpacing: LetterSpacing;
+    lineHeight: LineHeight;
+    paragraphIndent: number;
+    paragraphSpacing: number;
+    textCase: TextCase;
+    textDecoration: TextDecoration;
+
+    remove() {
+      super.remove();
+      textStyles.splice(textStyles.indexOf(this), 1);
+    }
+  }
+
+  class GridStyleStub extends BaseStyleStub implements GridStyle {
+    // @ts-ignore
+    type = "GRID" as StyleType;
+    layoutGrids: readonly LayoutGrid[];
+
+    remove() {
+      super.remove();
+      gridStyles.splice(gridStyles.indexOf(this), 1);
+    }
+  }
 
   // @ts-ignore
   class PluginApiStub implements PluginAPI {
@@ -521,6 +566,33 @@ export const createFigma = (config: TConfig): PluginAPI => {
       allocateId(style);
       styles.set(style.id, style);
       paintStyles.push(style);
+      return style;
+    }
+
+    // @ts-ignore
+    createEffectStyle() {
+      const style = new EffectStyleStub();
+      allocateId(style);
+      styles.set(style.id, style);
+      effectStyles.push(style);
+      return style;
+    }
+
+    // @ts-ignore
+    createTextStyle() {
+      const style = new TextStyleStub();
+      allocateId(style);
+      styles.set(style.id, style);
+      textStyles.push(style);
+      return style;
+    }
+
+    // @ts-ignore
+    createGridStyle() {
+      const style = new GridStyleStub();
+      allocateId(style);
+      styles.set(style.id, style);
+      gridStyles.push(style);
       return style;
     }
 
