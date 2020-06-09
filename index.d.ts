@@ -1,1 +1,1 @@
-import "@figma-plugin/types"
+// import "@figma-plugin/types"
