@@ -182,6 +182,9 @@ export const createFigma = (config: TConfig): PluginAPI => {
     }
 
     getPluginData(key: string) {
+      if (joinedConfig.simulateErrors && this.removed) {
+        throw new Error(`The node with id ${this.id} does not exist`);
+      }
       if (!this.pluginData) {
         return;
       }
