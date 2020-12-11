@@ -38,3 +38,8 @@ npm i figma-api-stub --save
 ```javascript
 createFigma(): PluginAPI
 ```
+
+## Used by
+
+- [react-figma](https://github.com/react-figma/react-figma)
+- [FigmaToCode](https://github.com/bernaferrari/FigmaToCode)
