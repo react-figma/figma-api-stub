@@ -3,7 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/figma-api-stub.svg)](https://www.npmjs.com/package/figma-api-stub)
 [![CircleCI](https://circleci.com/gh/react-figma/figma-api-stub.svg?style=shield)](https://circleci.com/gh/react-figma/figma-api-stub)
 
-Stub implementation of [Figma Plugins API](https://www.figma.com/plugin-docs/intro/).
+A stub implementation of [Figma Plugins API](https://www.figma.com/plugin-docs/intro/).
 
 ```javascript
 import {createFigma} from "figma-api-stub";
@@ -14,7 +14,7 @@ rect.resize(100, 200);
 ```
 
 ---
-⚠️ Warning! It's not official implementation and it hasn't purpose to fully reproduce Figma behavior and API.
+⚠️ Warning! It's not an official implementation, and it hasn't the purpose to fully reproduce Figma behavior and API.
 
 ---
 
