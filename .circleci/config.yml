@@ -7,7 +7,7 @@ version: 2
 defaults: &defaults
   working_directory: ~/repo
   docker:
-    - image: circleci/node:8.15
+    - image: circleci/node:12.6
 
 jobs:
   test:
@@ -23,11 +23,15 @@ jobs:
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
 
-      - run: npm install
+      - run: yarn --frozen-lockfile
 
       - run:
           name: Run TypeScript
-          command: npm run tsc
+          command: yarn tsc
+
+      - run:
+          name: Run tests
+          command: yarn test --maxWorkers=2 --ci
 
       - save_cache:
           paths:
