@@ -369,6 +369,14 @@ export const createFigma = (config: TConfig): PluginAPI => {
 
   class GroupNodeStub {
     type = "GROUP";
+
+    set constraints(value) {
+      if (joinedConfig.simulateErrors) {
+        throw new Error(
+          `Error: Cannot add property constraints, object is not extensible`
+        );
+      }
+    }
   }
 
   applyMixins(GroupNodeStub, [
