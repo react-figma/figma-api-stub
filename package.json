@@ -47,6 +47,7 @@
   },
   "dependencies": {
     "clone-deep": "^4.0.1",
+    "nanoid": "^3.1.20",
     "rxjs": "^6.5.3"
   }
 }

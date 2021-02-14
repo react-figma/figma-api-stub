@@ -40,4 +40,9 @@ describe("allocating id", () => {
     expect(rect3.id).toEqual("2:5");
     expect(rect4.id).toEqual("2:6");
   });
+
+  it("style id", () => {
+    const style = figma.createPaintStyle();
+    expect(style.id.length).toEqual(43);
+  });
 });

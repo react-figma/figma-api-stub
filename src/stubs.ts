@@ -3,6 +3,7 @@ import { Subject, Subscription } from "rxjs";
 import { take } from "rxjs/operators";
 import { applyMixins } from "./applyMixins";
 import { Helvetica, Roboto } from "./fonts";
+import { nanoid } from "nanoid";
 
 type TConfig = {
   simulateErrors?: boolean;
@@ -38,7 +39,7 @@ export const createFigma = (config: TConfig): PluginAPI => {
 
   let majorId = 1;
   let minorId = 1;
-  const allocateId = (node, shouldIncreaseMajor?: boolean) => {
+  const allocateNodeId = (node, shouldIncreaseMajor?: boolean) => {
     minorId += 1;
     if (!shouldIncreaseMajor) {
       node.id = `${majorId}:${minorId}`;
@@ -46,6 +47,10 @@ export const createFigma = (config: TConfig): PluginAPI => {
       node.id = `${majorId}:${1}`;
       majorId += 1;
     }
+  };
+
+  const allocateStyleId = style => {
+    style.id = `S:${nanoid(40)},`;
   };
 
   class UIAPIStub {
@@ -522,7 +527,7 @@ export const createFigma = (config: TConfig): PluginAPI => {
     // @ts-ignore
     createPage() {
       const result: any = new PageNodeStub();
-      allocateId(result, true);
+      allocateNodeId(result, true);
       this.root.appendChild(result);
       return result;
     }
@@ -530,7 +535,7 @@ export const createFigma = (config: TConfig): PluginAPI => {
     // @ts-ignore
     createFrame() {
       const result: any = new FrameNodeStub();
-      allocateId(result);
+      allocateNodeId(result);
       this.currentPage.appendChild(result);
       return result;
     }
@@ -538,7 +543,7 @@ export const createFigma = (config: TConfig): PluginAPI => {
     // @ts-ignore
     createComponent() {
       const result: any = new ComponentNodeStub();
-      allocateId(result);
+      allocateNodeId(result);
       this.currentPage.appendChild(result);
       return result;
     }
@@ -546,7 +551,7 @@ export const createFigma = (config: TConfig): PluginAPI => {
     // @ts-ignore
     createRectangle() {
       const result: any = new RectangleNodeStub();
-      allocateId(result);
+      allocateNodeId(result);
       this.currentPage.appendChild(result);
       return result;
     }
@@ -554,7 +559,7 @@ export const createFigma = (config: TConfig): PluginAPI => {
     // @ts-ignore
     createText() {
       const result: any = new TextNodeStub();
-      allocateId(result);
+      allocateNodeId(result);
       this.currentPage.appendChild(result);
       return result;
     }
@@ -586,7 +591,7 @@ export const createFigma = (config: TConfig): PluginAPI => {
     // @ts-ignore
     createPaintStyle() {
       const style = new PaintStyleStub();
-      allocateId(style);
+      allocateStyleId(style);
       styles.set(style.id, style);
       paintStyles.push(style);
       return style;
@@ -595,7 +600,7 @@ export const createFigma = (config: TConfig): PluginAPI => {
     // @ts-ignore
     createEffectStyle() {
       const style = new EffectStyleStub();
-      allocateId(style);
+      allocateStyleId(style);
       styles.set(style.id, style);
       effectStyles.push(style);
       return style;
@@ -604,7 +609,7 @@ export const createFigma = (config: TConfig): PluginAPI => {
     // @ts-ignore
     createTextStyle() {
       const style = new TextStyleStub();
-      allocateId(style);
+      allocateStyleId(style);
       styles.set(style.id, style);
       textStyles.push(style);
       return style;
@@ -613,7 +618,7 @@ export const createFigma = (config: TConfig): PluginAPI => {
     // @ts-ignore
     createGridStyle() {
       const style = new GridStyleStub();
-      allocateId(style);
+      allocateStyleId(style);
       styles.set(style.id, style);
       gridStyles.push(style);
       return style;
@@ -628,7 +633,7 @@ export const createFigma = (config: TConfig): PluginAPI => {
       }
 
       const group: any = new GroupNodeStub();
-      allocateId(group);
+      allocateNodeId(group);
       nodes.forEach(node => group.appendChild(node));
       if (index) {
         parent.insertChild(index, group);
