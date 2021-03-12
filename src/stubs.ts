@@ -332,7 +332,10 @@ export const createFigma = (config: TConfig): PluginAPI => {
       start: number,
       end: number
     ): FontName | PluginAPI["mixed"] {
-      return this._fontName || { family: "Roboto", style: "Regular" };
+      if (start && end && end >= start) {
+        return this._fontName || { family: "Roboto", style: "Regular" };
+      }
+      throw new Error(`Error: Invalid range: ${start}, ${end}`);
     }
   }
 
