@@ -233,6 +233,10 @@ export const createFigma = (config: TConfig): PluginAPI => {
   }
 
   class LayoutMixinStub implements LayoutMixin {
+    layoutGrow: number;
+    rescale(scale: number): void {
+      return;
+    }
     absoluteTransform: Transform;
     relativeTransform: Transform;
     x: number;
@@ -323,6 +327,12 @@ export const createFigma = (config: TConfig): PluginAPI => {
         );
       }
       this._textAutoResize = value;
+    }
+    getRangeFontName(
+      start: number,
+      end: number
+    ): FontName | PluginAPI["mixed"] {
+      return this._fontName || { family: "Roboto", style: "Regular" };
     }
   }
 
