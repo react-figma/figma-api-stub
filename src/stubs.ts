@@ -233,6 +233,16 @@ export const createFigma = (config: TConfig): PluginAPI => {
   }
 
   class LayoutMixinStub implements LayoutMixin {
+    layoutGrow: number;
+    rescale(scale: number): void {
+      if (joinedConfig.simulateErrors && scale < 0.01) {
+        throw new Error(
+          'Error: in rescale: Expected "scale" to have value >= 0.01'
+        );
+      }
+      this.width = this.width * scale;
+      this.height = this.height * scale;
+    }
     absoluteTransform: Transform;
     relativeTransform: Transform;
     x: number;
@@ -323,6 +333,28 @@ export const createFigma = (config: TConfig): PluginAPI => {
         );
       }
       this._textAutoResize = value;
+    }
+    getRangeFontName(
+      start: number,
+      end: number
+    ): FontName | PluginAPI["mixed"] {
+      if (joinedConfig.simulateErrors && start < 0) {
+        throw new Error(`Error: Expected "start" to have value >=0`);
+      }
+      if (joinedConfig.simulateErrors && end < 0) {
+        throw new Error(`Error: Expected "end" to have value >=0`);
+      }
+      if (joinedConfig.simulateErrors && end > this._characters.length) {
+        throw new Error(
+          `Error: Range outside of available characters. 'start' must be less than node.characters.length and 'end' must be less than or equal to node.characters.length`
+        );
+      }
+      if (joinedConfig.simulateErrors && end === start) {
+        throw new Error(
+          `Error: Empty range selected. 'end' must be greater than 'start'`
+        );
+      }
+      return this._fontName || { family: "Roboto", style: "Regular" };
     }
   }
 
