@@ -356,6 +356,53 @@ export const createFigma = (config: TConfig): PluginAPI => {
       }
       return this._fontName || { family: "Roboto", style: "Regular" };
     }
+    deleteCharacters(start: number, end: number): void {
+      if (joinedConfig.simulateErrors && !isFontLoaded(this.fontName)) {
+        throw new Error(
+          `Error: font is not loaded ${this.fontName.family} ${this.fontName.style}`
+        );
+      }
+      if (joinedConfig.simulateErrors && start < 0) {
+        throw new Error(`Error: Expected "start" to have value >=0`);
+      }
+      if (joinedConfig.simulateErrors && end < 0) {
+        throw new Error(`Error: Expected "end" to have value >=0`);
+      }
+      if (joinedConfig.simulateErrors && end > this._characters.length) {
+        throw new Error(
+          `Error: Cannot delete characters at index greater than the length of the text`
+        );
+      }
+      this._characters =
+        this._characters.slice(start, end) +
+        (end === this._characters.length
+          ? ""
+          : this._characters.slice(end + 1));
+    }
+    insertCharacters(
+      start: number,
+      characters: string,
+      _useStyle: "BEFORE" | "AFTER" = "BEFORE"
+    ): void {
+      if (joinedConfig.simulateErrors && !isFontLoaded(this.fontName)) {
+        throw new Error(
+          `Error: font is not loaded ${this.fontName.family} ${this.fontName.style}`
+        );
+      }
+      if (joinedConfig.simulateErrors && start < 0) {
+        throw new Error(`Error: Expected "start" to have value >=0`);
+      }
+      if (joinedConfig.simulateErrors && start > this._characters.length) {
+        throw new Error(
+          `Error: Cannot insert characters at index greater than the length of the text`
+        );
+      }
+      this._characters = [
+        this._characters.slice(0, start),
+        characters,
+        this._characters.slice(start)
+      ].join("");
+    }
   }
 
   applyMixins(TextNodeStub, [
