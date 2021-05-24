@@ -490,6 +490,10 @@ export const createFigma = (config: TConfig): PluginAPI => {
   class InstanceNodeStub {
     type = "INSTANCE";
     children: any;
+
+    detachInstance(): void {
+      this.type = "FRAME";
+    }
   }
 
   applyMixins(InstanceNodeStub, [
