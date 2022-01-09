@@ -288,6 +288,27 @@ export const createFigma = (config: TConfig): PluginAPI => {
     }
   }
 
+  class GeometryMixinStub implements GeometryMixin {
+    private _fills: ReadonlyArray<Paint> | PluginAPI["mixed"];
+    get fills() {
+      return this._fills || [];
+    }
+    set fills(theFills) {
+      this._fills = theFills;
+    }
+    strokes: ReadonlyArray<Paint>;
+    strokeWeight: number;
+    strokeMiterLimit: number;
+    strokeAlign: "CENTER" | "INSIDE" | "OUTSIDE";
+    strokeCap: StrokeCap | PluginAPI["mixed"];
+    strokeJoin: StrokeJoin | PluginAPI["mixed"];
+    dashPattern: ReadonlyArray<number>;
+    fillStyleId: string | PluginAPI["mixed"];
+    strokeStyleId: string;
+    outlineStroke() {
+      return null;
+    }
+  }
   class RectangleNodeStub {
     type = "RECTANGLE";
   }
@@ -295,7 +316,8 @@ export const createFigma = (config: TConfig): PluginAPI => {
   applyMixins(RectangleNodeStub, [
     BaseNodeMixinStub,
     LayoutMixinStub,
-    ExportMixinStub
+    ExportMixinStub,
+    GeometryMixinStub
   ]);
 
   class TextNodeStub {
@@ -408,7 +430,8 @@ export const createFigma = (config: TConfig): PluginAPI => {
   applyMixins(TextNodeStub, [
     BaseNodeMixinStub,
     LayoutMixinStub,
-    ExportMixinStub
+    ExportMixinStub,
+    GeometryMixinStub
   ]);
 
   class DocumentNodeStub {
@@ -448,7 +471,8 @@ export const createFigma = (config: TConfig): PluginAPI => {
     BaseNodeMixinStub,
     ChildrenMixinStub,
     LayoutMixinStub,
-    ExportMixinStub
+    ExportMixinStub,
+    GeometryMixinStub
   ]);
 
   class GroupNodeStub {
@@ -484,7 +508,8 @@ export const createFigma = (config: TConfig): PluginAPI => {
     BaseNodeMixinStub,
     ChildrenMixinStub,
     ExportMixinStub,
-    LayoutMixinStub
+    LayoutMixinStub,
+    GeometryMixinStub
   ]);
 
   class InstanceNodeStub {
