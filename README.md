@@ -44,3 +44,4 @@ createFigma(): PluginAPI
 
 - [react-figma](https://github.com/react-figma/react-figma)
 - [FigmaToCode](https://github.com/bernaferrari/FigmaToCode)
+- [figx](https://github.com/n0ruSh/figx)
