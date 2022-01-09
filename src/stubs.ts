@@ -53,6 +53,10 @@ export const createFigma = (config: TConfig): PluginAPI => {
     style.id = `S:${nanoid(40)},`;
   };
 
+  const getImageHash = () => {
+    return nanoid(40);
+  };
+
   class UIAPIStub {
     onmessage: MessageEventHandler | undefined;
 
@@ -705,6 +709,14 @@ export const createFigma = (config: TConfig): PluginAPI => {
       styles.set(style.id, style);
       gridStyles.push(style);
       return style;
+    }
+
+    createImage(bytes: Uint8Array) {
+      const hash = getImageHash();
+      return {
+        hash,
+        getBytesAsync: () => Promise.resolve(bytes)
+      };
     }
 
     // @ts-ignore
