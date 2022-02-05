@@ -146,18 +146,35 @@ export const createFigma = (config: TConfig): PluginAPI => {
       this.children.splice(index, 0, child);
     }
 
+    findAllWithCriteria<T extends NodeType[]>(criteria: { types: T }) {
+      const typeLookup = new Set(criteria.types);
+      return this.findAll(() => true).filter(child =>
+        typeLookup.has(child.type)
+      );
+    }
+
     findAll(callback) {
       if (!this.children) {
         return [];
       }
-      return this.children.filter(callback);
+      const matchingChildren = [];
+      this.children.forEach(child => {
+        if (callback(child)) {
+          matchingChildren.push(child);
+        }
+        if ("findAll" in child) {
+          matchingChildren.push(...child.findAll(callback));
+        }
+      });
+      return matchingChildren;
     }
 
     findOne(callback) {
-      if (!this.children) {
-        return null;
+      const matches = this.findAll(callback);
+      if (matches.length > 0) {
+        return matches[0];
       }
-      return this.children.find(callback);
+      return null;
     }
 
     findChild(callback) {
@@ -171,7 +188,7 @@ export const createFigma = (config: TConfig): PluginAPI => {
       if (!this.children) {
         return null;
       }
-      return this.children.find(callback);
+      return this.children.filter(callback);
     }
   }
 
@@ -180,6 +197,7 @@ export const createFigma = (config: TConfig): PluginAPI => {
     parent: (BaseNode & ChildrenMixin) | null;
     name: string;
     removed: boolean;
+    relaunchData: { [command: string]: string };
     pluginData: { [key: string]: string };
     sharedPluginData: { [namespace: string]: { [key: string]: string } };
 
@@ -200,6 +218,16 @@ export const createFigma = (config: TConfig): PluginAPI => {
       return this.pluginData[key];
     }
 
+    getPluginDataKeys(): string[] {
+      if (joinedConfig.simulateErrors && this.removed) {
+        throw new Error(`The node with id ${this.id} does not exist`);
+      }
+      if (!this.pluginData) {
+        return [];
+      }
+      return Object.keys(this.pluginData);
+    }
+
     setSharedPluginData(namespace: string, key: string, value: string) {
       if (!this.sharedPluginData) {
         this.sharedPluginData = {};
@@ -217,9 +245,19 @@ export const createFigma = (config: TConfig): PluginAPI => {
       return this.sharedPluginData[namespace][key];
     }
 
-    setRelaunchData(data) {
-      // TODO: Implement this method
-      console.warn('"setRelaunchData" is not implemented. Skipped', data);
+    getSharedPluginDataKeys(namespace: string): string[] {
+      if (!this.sharedPluginData || !this.sharedPluginData[namespace]) {
+        return;
+      }
+      return Object.keys(this.sharedPluginData[namespace]);
+    }
+
+    setRelaunchData(data: { [command: string]: string }) {
+      this.relaunchData = data;
+    }
+
+    getRelaunchData(): { [command: string]: string } {
+      return this.relaunchData || {};
     }
 
     remove() {
@@ -258,6 +296,8 @@ export const createFigma = (config: TConfig): PluginAPI => {
 
     constrainProportions: boolean;
     layoutAlign: LayoutMixin["layoutAlign"];
+
+    absoluteRenderBounds: Rect | null;
 
     resize(width, height) {
       if (joinedConfig.simulateErrors && isInsideInstance(this)) {
@@ -309,6 +349,8 @@ export const createFigma = (config: TConfig): PluginAPI => {
     dashPattern: ReadonlyArray<number>;
     fillStyleId: string | PluginAPI["mixed"];
     strokeStyleId: string;
+    strokeGeometry: VectorPaths;
+    fillGeometry: VectorPaths;
     outlineStroke() {
       return null;
     }
@@ -546,8 +588,66 @@ export const createFigma = (config: TConfig): PluginAPI => {
     description: string;
     remote: boolean = false;
     key: string;
+    documentationLinks: readonly DocumentationLink[];
+    removed: boolean;
+
+    relaunchData: { [command: string]: string };
+    pluginData: { [key: string]: string };
+    sharedPluginData: { [namespace: string]: { [key: string]: string } };
+
+    setPluginData(key: string, value: string) {
+      if (!this.pluginData) {
+        this.pluginData = {};
+      }
+      this.pluginData[key] = value;
+    }
+
+    getPluginData(key: string) {
+      if (joinedConfig.simulateErrors && this.removed) {
+        throw new Error(`The style with id ${this.id} does not exist`);
+      }
+      if (!this.pluginData) {
+        return;
+      }
+      return this.pluginData[key];
+    }
+
+    getPluginDataKeys(): string[] {
+      if (joinedConfig.simulateErrors && this.removed) {
+        throw new Error(`The style with id ${this.id} does not exist`);
+      }
+      if (!this.pluginData) {
+        return [];
+      }
+      return Object.keys(this.pluginData);
+    }
+
+    setSharedPluginData(namespace: string, key: string, value: string) {
+      if (!this.sharedPluginData) {
+        this.sharedPluginData = {};
+      }
+      if (!this.sharedPluginData[namespace]) {
+        this.sharedPluginData[namespace] = {};
+      }
+      this.sharedPluginData[namespace][key] = value;
+    }
+
+    getSharedPluginData(namespace: string, key: string) {
+      if (!this.sharedPluginData || !this.sharedPluginData[namespace]) {
+        return;
+      }
+      return this.sharedPluginData[namespace][key];
+    }
+
+    getSharedPluginDataKeys(namespace: string): string[] {
+      if (!this.sharedPluginData || !this.sharedPluginData[namespace]) {
+        return;
+      }
+      return Object.keys(this.sharedPluginData[namespace]);
+    }
 
     remove(): void {
+      this.removed = true;
       styles.delete(this.id);
     }
 
@@ -555,6 +655,8 @@ export const createFigma = (config: TConfig): PluginAPI => {
       return await "UNPUBLISHED";
     }
   }
+
+  applyMixins(BaseStyleStub, []);
 
   class PaintStyleStub extends BaseStyleStub implements PaintStyle {
     // @ts-ignore
@@ -778,10 +880,10 @@ export const createFigma = (config: TConfig): PluginAPI => {
       return Promise.resolve([...Roboto, ...Helvetica]);
     }
 
-    on(
-      type: "selectionchange" | "currentpagechange" | "close",
-      callback: () => void
-    ) {
+    on(type: ArgFreeEventType, callback: () => void);
+    on(type: "run", callback: (event: RunEvent) => void);
+    on(type: "drop", callback: (event: DropEvent) => boolean): void;
+    on(type: any, callback: any) {
       if (type === "selectionchange") {
         selectionChangeSubscribes.set(
           callback,
@@ -796,10 +898,10 @@ export const createFigma = (config: TConfig): PluginAPI => {
       }
     }
 
-    once(
-      type: "selectionchange" | "currentpagechange" | "close",
-      callback: () => void
-    ) {
+    once(type: ArgFreeEventType, callback: () => void);
+    once(type: "run", callback: (event: RunEvent) => void);
+    once(type: "drop", callback: (event: DropEvent) => boolean): void;
+    once(type: any, callback: any) {
       if (type === "selectionchange") {
         selectionChangeSubscribes.set(
           callback,
@@ -814,10 +916,10 @@ export const createFigma = (config: TConfig): PluginAPI => {
       }
     }
 
-    off(
-      type: "selectionchange" | "currentpagechange" | "close",
-      callback: () => void
-    ) {
+    off(type: ArgFreeEventType, callback: () => void);
+    off(type: "run", callback: (event: RunEvent) => void);
+    off(type: "drop", callback: (event: DropEvent) => boolean): void;
+    off(type: any, callback: any) {
       if (type === "selectionchange") {
         selectionChangeSubscribes.get(callback).unsubscribe();
       }
