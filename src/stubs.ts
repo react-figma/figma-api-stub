@@ -1,4 +1,5 @@
 import * as cloneDeep from "clone-deep";
+import * as isPlainObject from "is-plain-object";
 import { Subject, Subscription } from "rxjs";
 import { take } from "rxjs/operators";
 import { applyMixins } from "./applyMixins";
@@ -205,7 +206,11 @@ export const createFigma = (config: TConfig): PluginAPI => {
       if (!this.pluginData) {
         this.pluginData = {};
       }
-      this.pluginData[key] = value;
+      if (value === "") {
+        delete this.pluginData[key];
+      } else {
+        this.pluginData[key] = value;
+      }
     }
 
     getPluginData(key: string) {
@@ -235,7 +240,11 @@ export const createFigma = (config: TConfig): PluginAPI => {
       if (!this.sharedPluginData[namespace]) {
         this.sharedPluginData[namespace] = {};
       }
-      this.sharedPluginData[namespace][key] = value;
+      if (value === "") {
+        delete this.sharedPluginData[namespace][key];
+      } else {
+        this.sharedPluginData[namespace][key] = value;
+      }
     }
 
     getSharedPluginData(namespace: string, key: string) {
@@ -543,9 +552,14 @@ export const createFigma = (config: TConfig): PluginAPI => {
   class ComponentNodeStub {
     type = "COMPONENT";
     children = [];
+    pluginData: { [key: string]: string } = {};
+    sharedPluginData: { [namespace: string]: { [key: string]: string } } = {};
+
     createInstance() {
       const instance = new InstanceNodeStub();
       instance.children = cloneDeep(this.children);
+      instance.pluginData = Object.create(this.pluginData);
+      instance.sharedPluginData = Object.create(this.sharedPluginData);
       return instance;
     }
   }
@@ -561,6 +575,8 @@ export const createFigma = (config: TConfig): PluginAPI => {
   class InstanceNodeStub {
     type = "INSTANCE";
     children: any;
+    pluginData: { [key: string]: string };
+    sharedPluginData: { [namespace: string]: { [key: string]: string } };
 
     detachInstance(): void {
       this.type = "FRAME";
@@ -569,6 +585,7 @@ export const createFigma = (config: TConfig): PluginAPI => {
 
   applyMixins(InstanceNodeStub, [
     BaseNodeMixinStub,
+    ChildrenMixinStub,
     ExportMixinStub,
     LayoutMixinStub
   ]);
@@ -599,7 +616,11 @@ export const createFigma = (config: TConfig): PluginAPI => {
       if (!this.pluginData) {
         this.pluginData = {};
       }
-      this.pluginData[key] = value;
+      if (value === "") {
+        delete this.pluginData[key];
+      } else {
+        this.pluginData[key] = value;
+      }
     }
 
     getPluginData(key: string) {
@@ -629,7 +650,11 @@ export const createFigma = (config: TConfig): PluginAPI => {
       if (!this.sharedPluginData[namespace]) {
         this.sharedPluginData[namespace] = {};
       }
-      this.sharedPluginData[namespace][key] = value;
+      if (value === "") {
+        delete this.sharedPluginData[namespace][key];
+      } else {
+        this.sharedPluginData[namespace][key] = value;
+      }
     }
 
     getSharedPluginData(namespace: string, key: string) {
