@@ -30,7 +30,7 @@ describe("getPluginData", () => {
     }).toThrow("The node with id 1:2 does not exist");
   });
 
-  fdescribe("components and instances", () => {
+  describe("components and instances", () => {
     it("instances inherit plugin data from main component", () => {
       const component = figma.createComponent();
       component.setPluginData("foo", "bar");
