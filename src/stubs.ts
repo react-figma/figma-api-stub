@@ -577,6 +577,7 @@ export const createFigma = (config: TConfig): PluginAPI => {
 
   class ComponentNodeStub {
     type = "COMPONENT";
+    key = nanoid(40);
     children = [];
     pluginData: { [key: string]: string } = {};
     sharedPluginData: { [namespace: string]: { [key: string]: string } } = {};
@@ -586,6 +587,7 @@ export const createFigma = (config: TConfig): PluginAPI => {
       instance.children = this.children.map(cloneChildren);
       instance.pluginData = Object.create(this.pluginData);
       instance.sharedPluginData = Object.create(this.sharedPluginData);
+      instance.mainComponent = this;
       return instance;
     }
   }
@@ -603,6 +605,7 @@ export const createFigma = (config: TConfig): PluginAPI => {
     children: any;
     pluginData: { [key: string]: string } = {};
     sharedPluginData: { [namespace: string]: { [key: string]: string } } = {};
+    mainComponent: null | ComponentNodeStub;
 
     detachInstance(): void {
       this.type = "FRAME";
