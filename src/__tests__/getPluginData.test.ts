@@ -30,7 +30,7 @@ describe("getPluginData", () => {
     }).toThrow("The node with id 1:2 does not exist");
   });
 
-  describe("components and instances", () => {
+  fdescribe("components and instances", () => {
     it("instances inherit plugin data from main component", () => {
       const component = figma.createComponent();
       component.setPluginData("foo", "bar");
@@ -116,23 +116,24 @@ describe("getPluginData", () => {
       expect(instanceRect.getPluginData("foo")).toBe("baz");
     });
 
-    // it("setting plugin data to \"\" in an instance child deletes that key and reverts to the main component's corresponding child's pluginData for that key", () => {
-    //   const component = figma.createComponent();
-    //   const componentRect = figma.createRectangle();
-    //   component.appendChild(componentRect);
-    //   componentRect.setPluginData("foo", "bar");
+    it("setting plugin data to \"\" in an instance child deletes that key and reverts to the main component's corresponding child's pluginData for that key", () => {
+      const component = figma.createComponent();
+      const componentRect = figma.createRectangle();
+      component.appendChild(componentRect);
+      componentRect.setPluginData("foo", "bar");
 
-    //   const instance = component.createInstance();
-    //   const instanceRect = instance.findOne(
-    //     child => child.type === "RECTANGLE"
-    //   );
-    //   instanceRect.setPluginData("foo", "baz");
+      const instance = component.createInstance();
+      const instanceRect = instance.findOne(
+        child => child.type === "RECTANGLE"
+      );
+      instanceRect.setPluginData("foo", "baz");
 
-    //   expect(instanceRect.getPluginData("foo")).toBe("baz");
+      expect(instanceRect.getPluginData("foo")).toBe("baz");
 
-    //   componentRect.setPluginData("foo", "");
+      instanceRect.setPluginData("foo", "");
 
-    //   expect(instanceRect.getPluginData("foo")).toBe("bar");
-    // });
+      expect(componentRect.getPluginData("foo")).toBe("bar");
+      expect(instanceRect.getPluginData("foo")).toBe("bar");
+    });
   });
 });
