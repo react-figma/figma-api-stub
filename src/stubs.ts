@@ -542,10 +542,12 @@ export const createFigma = (config: TConfig): PluginAPI => {
 
   class ComponentNodeStub {
     type = "COMPONENT";
+    key = nanoid(40);
     children = [];
     createInstance() {
       const instance = new InstanceNodeStub();
       instance.children = cloneDeep(this.children);
+      instance.mainComponent = this;
       return instance;
     }
   }
@@ -561,6 +563,7 @@ export const createFigma = (config: TConfig): PluginAPI => {
   class InstanceNodeStub {
     type = "INSTANCE";
     children: any;
+    mainComponent: null | ComponentNodeStub;
 
     detachInstance(): void {
       this.type = "FRAME";
