@@ -138,10 +138,10 @@
     exec-sh "^0.3.2"
     minimist "^1.2.0"
 
-"@figma/plugin-typings@^1.42.1":
+"@figma/plugin-typings@^1.42.0":
   version "1.42.1"
-  resolved "https://artifactory.service.bo1.csnzoo.com/artifactory/api/npm/npm/@figma/plugin-typings/-/plugin-typings-1.42.1.tgz#b9999c3d162db9b3d384c609b15ed18e49b0540f"
-  integrity sha1-uZmcPRYtubPThMYJsV7RjkmwVA8=
+  resolved "https://registry.yarnpkg.com/@figma/plugin-typings/-/plugin-typings-1.42.1.tgz#b9999c3d162db9b3d384c609b15ed18e49b0540f"
+  integrity sha512-TQy81xtgcNWhu2uSiOZIxzGOC8Y/9rcP04GLp2f5MGg/LOH5BPNIkc8mRYPqInwcgQTnvxDpirr8MpYQPYRwDQ==
 
 "@jest/console@^24.7.1", "@jest/console@^24.9.0":
   version "24.9.0"
