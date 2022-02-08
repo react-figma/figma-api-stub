@@ -14,6 +14,13 @@ describe("getPluginData", () => {
     expect(rect.getPluginData("key")).toEqual("value");
   });
 
+  it("can retreive keys", () => {
+    const rect = figma.createRectangle();
+    rect.setPluginData("key1", "value");
+    rect.setPluginData("key2", "value");
+    expect(rect.getPluginDataKeys()).toEqual(["key1", "key2"]);
+  });
+
   it("removed node throws error", () => {
     const rect = figma.createRectangle();
     rect.setPluginData("key", "value");
