@@ -1,6 +1,6 @@
 {
   "name": "figma-api-stub",
-  "version": "0.0.49",
+  "version": "0.0.50",
   "description": "Figma API stub",
   "main": "./dist/index.js",
   "scripts": {
