@@ -138,10 +138,10 @@
     exec-sh "^0.3.2"
     minimist "^1.2.0"
 
-"@figma/plugin-typings@^1.42.1":
+"@figma/plugin-typings@^1.42.0":
   version "1.42.1"
-  resolved "https://artifactory.service.bo1.csnzoo.com/artifactory/api/npm/npm/@figma/plugin-typings/-/plugin-typings-1.42.1.tgz#b9999c3d162db9b3d384c609b15ed18e49b0540f"
-  integrity sha1-uZmcPRYtubPThMYJsV7RjkmwVA8=
+  resolved "https://registry.yarnpkg.com/@figma/plugin-typings/-/plugin-typings-1.42.1.tgz#b9999c3d162db9b3d384c609b15ed18e49b0540f"
+  integrity sha512-TQy81xtgcNWhu2uSiOZIxzGOC8Y/9rcP04GLp2f5MGg/LOH5BPNIkc8mRYPqInwcgQTnvxDpirr8MpYQPYRwDQ==
 
 "@jest/console@^24.7.1", "@jest/console@^24.9.0":
   version "24.9.0"
@@ -2346,9 +2346,9 @@ nan@^2.12.1:
   integrity sha512-INOFj37C7k3AfaNTtX8RhsTw7qRy7eLET14cROi9+5HAVbbHuIWUHEauBv5qT4Av2tWasiTY1Jw6puUNqRJXQg==
 
 nanoid@^3.1.20:
-  version "3.1.20"
-  resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-3.1.20.tgz#badc263c6b1dcf14b71efaa85f6ab4c1d6cfc788"
-  integrity sha512-a1cQNyczgKbLX9jwbS/+d7W8fX/RfgYR7lVWwWOGIPNgK2m0MWvrGF6/m4kk6U3QcFMnZf3RIhL0v2Jgh/0Uxw==
+  version "3.1.31"
+  resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-3.1.31.tgz#f5b58a1ce1b7604da5f0605757840598d8974dc6"
+  integrity sha512-ZivnJm0o9bb13p2Ot5CpgC2rQdzB9Uxm/mFZweqm5eMViqOJe3PV6LU2E30SiLgheesmcPrjquqraoolONSA0A==
 
 nanomatch@^1.2.9:
   version "1.2.13"
