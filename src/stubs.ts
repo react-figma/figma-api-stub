@@ -572,6 +572,9 @@ export const createFigma = (config: TConfig): PluginAPI => {
     }
     clone.pluginData = Object.create(node.pluginData);
     clone.sharedPluginData = Object.create(node.sharedPluginData);
+    Object.entries(node.sharedPluginData).forEach(([key, val]) => {
+      clone.sharedPluginData[key] = Object.create(val as object);
+    });
     return clone;
   }
 
@@ -587,6 +590,9 @@ export const createFigma = (config: TConfig): PluginAPI => {
       instance.children = this.children.map(cloneChildren);
       instance.pluginData = Object.create(this.pluginData);
       instance.sharedPluginData = Object.create(this.sharedPluginData);
+      Object.entries(this.sharedPluginData).forEach(([key, val]) => {
+        instance.sharedPluginData[key] = Object.create(val as object);
+      });
       instance.mainComponent = this;
       return instance;
     }
