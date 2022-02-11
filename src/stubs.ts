@@ -207,7 +207,11 @@ export const createFigma = (config: TConfig): PluginAPI => {
       if (!this.pluginData) {
         this.pluginData = {};
       }
-      this.pluginData[key] = value;
+      if (value === "") {
+        delete this.pluginData[key];
+      } else {
+        this.pluginData[key] = value;
+      }
     }
 
     getPluginData(key: string) {
@@ -243,7 +247,11 @@ export const createFigma = (config: TConfig): PluginAPI => {
       if (!this.sharedPluginData[namespace]) {
         this.sharedPluginData[namespace] = {};
       }
-      this.sharedPluginData[namespace][key] = value;
+      if (value === "") {
+        delete this.sharedPluginData[namespace][key];
+      } else {
+        this.sharedPluginData[namespace][key] = value;
+      }
     }
 
     getSharedPluginData(namespace: string, key: string) {
