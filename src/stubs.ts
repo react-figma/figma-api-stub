@@ -1,3 +1,4 @@
+import * as cloneDeep from "clone-deep";
 import { Subject, Subscription } from "rxjs";
 import { take } from "rxjs/operators";
 import { applyMixins } from "./applyMixins";
@@ -200,15 +201,13 @@ export const createFigma = (config: TConfig): PluginAPI => {
     pluginData: { [key: string]: string } = {};
     sharedPluginData: { [namespace: string]: { [key: string]: string } } = {};
 
+    _orig: BaseNodeMixin | null = null;
+
     setPluginData(key: string, value: string) {
       if (!this.pluginData) {
         this.pluginData = {};
       }
-      if (value === "") {
-        delete this.pluginData[key];
-      } else {
-        this.pluginData[key] = value;
-      }
+      this.pluginData[key] = value;
     }
 
     getPluginData(key: string) {
@@ -218,10 +217,16 @@ export const createFigma = (config: TConfig): PluginAPI => {
       if (!this.pluginData) {
         return;
       }
-      return this.pluginData[key];
+      if (this.pluginData[key]) {
+        return this.pluginData[key];
+      } else {
+        if (this._orig) {
+          return this._orig.getPluginData(key);
+        }
+      }
     }
 
-    getPluginDataKeys(): string[] {
+    getPluginDataKeys = (): string[] => {
       if (joinedConfig.simulateErrors && this.removed) {
         throw new Error(`The node with id ${this.id} does not exist`);
       }
@@ -229,7 +234,7 @@ export const createFigma = (config: TConfig): PluginAPI => {
         return [];
       }
       return Object.keys(this.pluginData);
-    }
+    };
 
     setSharedPluginData(namespace: string, key: string, value: string) {
       if (!this.sharedPluginData) {
@@ -238,18 +243,24 @@ export const createFigma = (config: TConfig): PluginAPI => {
       if (!this.sharedPluginData[namespace]) {
         this.sharedPluginData[namespace] = {};
       }
-      if (value === "") {
-        delete this.sharedPluginData[namespace][key];
-      } else {
-        this.sharedPluginData[namespace][key] = value;
-      }
+      this.sharedPluginData[namespace][key] = value;
     }
 
     getSharedPluginData(namespace: string, key: string) {
-      if (!this.sharedPluginData || !this.sharedPluginData[namespace]) {
+      if (!this.sharedPluginData) {
         return;
       }
-      return this.sharedPluginData[namespace][key];
+
+      if (
+        this.sharedPluginData[namespace] &&
+        this.sharedPluginData[namespace][key]
+      ) {
+        return this.sharedPluginData[namespace][key];
+      } else {
+        if (this._orig) {
+          return this._orig.getSharedPluginData(namespace, key);
+        }
+      }
     }
 
     getSharedPluginDataKeys(namespace: string): string[] {
@@ -362,10 +373,8 @@ export const createFigma = (config: TConfig): PluginAPI => {
       return null;
     }
   }
-  class RectangleNodeStub {
+  class RectangleNodeStub extends BaseNodeMixinStub {
     type = "RECTANGLE";
-    pluginData: { [key: string]: string } = {};
-    sharedPluginData: { [namespace: string]: { [key: string]: string } } = {};
   }
 
   applyMixins(RectangleNodeStub, [
@@ -375,15 +384,11 @@ export const createFigma = (config: TConfig): PluginAPI => {
     GeometryMixinStub
   ]);
 
-  class TextNodeStub {
+  class TextNodeStub extends BaseNodeMixinStub {
     type = "TEXT";
-    pluginData: { [key: string]: string } = {};
-    sharedPluginData: { [namespace: string]: { [key: string]: string } } = {};
-
     private _fontName: FontName;
     private _characters: string;
     private _textAutoResize: string;
-
     get fontName() {
       return this._fontName || { family: "Roboto", style: "Regular" };
     }
@@ -493,21 +498,16 @@ export const createFigma = (config: TConfig): PluginAPI => {
     GeometryMixinStub
   ]);
 
-  class DocumentNodeStub {
+  class DocumentNodeStub extends BaseNodeMixinStub {
     type = "DOCUMENT";
     children = [];
-    pluginData: { [key: string]: string } = {};
-    sharedPluginData: { [namespace: string]: { [key: string]: string } } = {};
   }
 
   applyMixins(DocumentNodeStub, [BaseNodeMixinStub, ChildrenMixinStub]);
 
-  class PageNodeStub {
+  class PageNodeStub extends BaseNodeMixinStub {
     type = "PAGE";
     children = [];
-    pluginData: { [key: string]: string } = {};
-    sharedPluginData: { [namespace: string]: { [key: string]: string } } = {};
-
     _selection: Array<SceneNode>;
 
     get selection() {
@@ -526,11 +526,9 @@ export const createFigma = (config: TConfig): PluginAPI => {
     ExportMixinStub
   ]);
 
-  class FrameNodeStub {
+  class FrameNodeStub extends BaseNodeMixinStub {
     type = "FRAME";
     children = [];
-    pluginData: { [key: string]: string } = {};
-    sharedPluginData: { [namespace: string]: { [key: string]: string } } = {};
   }
 
   applyMixins(FrameNodeStub, [
@@ -543,8 +541,6 @@ export const createFigma = (config: TConfig): PluginAPI => {
 
   class GroupNodeStub {
     type = "GROUP";
-    pluginData: { [key: string]: string } = {};
-    sharedPluginData: { [namespace: string]: { [key: string]: string } } = {};
 
     set constraints(value) {
       if (joinedConfig.simulateErrors) {
@@ -565,34 +561,37 @@ export const createFigma = (config: TConfig): PluginAPI => {
   function cloneChildren(node) {
     const clone = new node.constructor();
     for (let key in node) {
-      clone[key] = node[key];
+      if (typeof node[key] === "function") {
+        clone[key] = node[key].bind(clone);
+      } else {
+        clone[key] = node[key];
+      }
     }
+    clone._orig = node;
+    clone.pluginData = {};
+    clone.sharedPluginData = {};
     if ("children" in node) {
-      clone.children = node.children.map(cloneChildren);
+      clone.children = node.children.map(child => cloneChildren(child));
+      clone.children.forEach(child => {
+        child.parent = clone;
+      });
     }
-    clone.pluginData = Object.create(node.pluginData);
-    clone.sharedPluginData = Object.create(node.sharedPluginData);
-    Object.entries(node.sharedPluginData).forEach(([key, val]) => {
-      clone.sharedPluginData[key] = Object.create(val as object);
-    });
     return clone;
   }
 
-  class ComponentNodeStub {
+  class ComponentNodeStub extends BaseNodeMixinStub {
     type = "COMPONENT";
     key = nanoid(40);
     children = [];
-    pluginData: { [key: string]: string } = {};
-    sharedPluginData: { [namespace: string]: { [key: string]: string } } = {};
 
     createInstance() {
       const instance = new InstanceNodeStub();
-      instance.children = this.children.map(cloneChildren);
-      instance.pluginData = Object.create(this.pluginData);
-      instance.sharedPluginData = Object.create(this.sharedPluginData);
-      Object.entries(this.sharedPluginData).forEach(([key, val]) => {
-        instance.sharedPluginData[key] = Object.create(val as object);
+      instance.children = this.children.map(child => cloneChildren(child));
+      instance.children.forEach(child => {
+        child.parent = this;
       });
+      instance.pluginData = {};
+      instance._orig = this;
       instance.mainComponent = this;
       return instance;
     }
@@ -606,11 +605,9 @@ export const createFigma = (config: TConfig): PluginAPI => {
     GeometryMixinStub
   ]);
 
-  class InstanceNodeStub {
+  class InstanceNodeStub extends BaseNodeMixinStub {
     type = "INSTANCE";
     children: any;
-    pluginData: { [key: string]: string } = {};
-    sharedPluginData: { [namespace: string]: { [key: string]: string } } = {};
     mainComponent: null | ComponentNodeStub;
 
     detachInstance(): void {
@@ -620,9 +617,9 @@ export const createFigma = (config: TConfig): PluginAPI => {
 
   applyMixins(InstanceNodeStub, [
     BaseNodeMixinStub,
-    ChildrenMixinStub,
     ExportMixinStub,
-    LayoutMixinStub
+    LayoutMixinStub,
+    ChildrenMixinStub
   ]);
 
   // --- styles
@@ -644,18 +641,14 @@ export const createFigma = (config: TConfig): PluginAPI => {
     removed: boolean;
 
     relaunchData: { [command: string]: string };
-    pluginData: { [key: string]: string } = {};
-    sharedPluginData: { [namespace: string]: { [key: string]: string } } = {};
+    pluginData: { [key: string]: string };
+    sharedPluginData: { [namespace: string]: { [key: string]: string } };
 
     setPluginData(key: string, value: string) {
       if (!this.pluginData) {
         this.pluginData = {};
       }
-      if (value === "") {
-        delete this.pluginData[key];
-      } else {
-        this.pluginData[key] = value;
-      }
+      this.pluginData[key] = value;
     }
 
     getPluginData(key: string) {
@@ -685,11 +678,7 @@ export const createFigma = (config: TConfig): PluginAPI => {
       if (!this.sharedPluginData[namespace]) {
         this.sharedPluginData[namespace] = {};
       }
-      if (value === "") {
-        delete this.sharedPluginData[namespace][key];
-      } else {
-        this.sharedPluginData[namespace][key] = value;
-      }
+      this.sharedPluginData[namespace][key] = value;
     }
 
     getSharedPluginData(namespace: string, key: string) {

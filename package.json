@@ -13,7 +13,8 @@
     "test": "jest"
   },
   "jest": {
-    "preset": "ts-jest/presets/js-with-babel"
+    "preset": "ts-jest/presets/js-with-babel",
+    "silent": false
   },
   "pre-commit": [
     "prettify",
