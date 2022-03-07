@@ -480,6 +480,179 @@ export const createFigma = (config: TConfig): PluginAPI => {
     GeometryMixinStub
   ]);
 
+  class TextSublayerNode {
+    readonly hasMissingFont;
+    paragraphIndent: number;
+    paragraphSpacing: number;
+    fontSize: number | PluginAPI["mixed"];
+    fontName: FontName | PluginAPI["mixed"];
+    textCase: TextCase | PluginAPI["mixed"];
+    textDecoration: TextDecoration | PluginAPI["mixed"];
+    letterSpacing: LetterSpacing | PluginAPI["mixed"];
+    hyperlink: HyperlinkTarget | null | PluginAPI["mixed"];
+    characters: string;
+
+    insertCharacters(
+      start: number,
+      characters: string,
+      _useStyle: "BEFORE" | "AFTER" = "BEFORE"
+    ): void {
+      if (joinedConfig.simulateErrors && !isFontLoaded(this.fontName)) {
+        throw new Error(
+          `Error: font is not loaded ${(this.fontName as FontName).family} ${
+            (this.fontName as FontName).style
+          }`
+        );
+      }
+      if (joinedConfig.simulateErrors && start < 0) {
+        throw new Error(`Error: Expected "start" to have value >=0`);
+      }
+      if (joinedConfig.simulateErrors && start > this.characters.length) {
+        throw new Error(
+          `Error: Cannot insert characters at index greater than the length of the text`
+        );
+      }
+      this.characters = [
+        this.characters.slice(0, start),
+        characters,
+        this.characters.slice(start)
+      ].join("");
+    }
+
+    deleteCharacters(start: number, end: number): void {
+      if (joinedConfig.simulateErrors && !isFontLoaded(this.fontName)) {
+        throw new Error(
+          `Error: font is not loaded ${(this.fontName as FontName).family} ${
+            (this.fontName as FontName).style
+          }`
+        );
+      }
+      if (joinedConfig.simulateErrors && start < 0) {
+        throw new Error(`Error: Expected "start" to have value >=0`);
+      }
+      if (joinedConfig.simulateErrors && end < 0) {
+        throw new Error(`Error: Expected "end" to have value >=0`);
+      }
+      if (joinedConfig.simulateErrors && end > this.characters.length) {
+        throw new Error(
+          `Error: Cannot delete characters at index greater than the length of the text`
+        );
+      }
+      this.characters =
+        this.characters.slice(start, end) +
+        (end === this.characters.length ? "" : this.characters.slice(end + 1));
+    }
+
+    getRangeFontName(
+      start: number,
+      end: number
+    ): FontName | PluginAPI["mixed"] {
+      if (joinedConfig.simulateErrors && start < 0) {
+        throw new Error(`Error: Expected "start" to have value >=0`);
+      }
+      if (joinedConfig.simulateErrors && end < 0) {
+        throw new Error(`Error: Expected "end" to have value >=0`);
+      }
+      if (joinedConfig.simulateErrors && end > this.characters.length) {
+        throw new Error(
+          `Error: Range outside of available characters. 'start' must be less than node.characters.length and 'end' must be less than or equal to node.characters.length`
+        );
+      }
+      if (joinedConfig.simulateErrors && end === start) {
+        throw new Error(
+          `Error: Empty range selected. 'end' must be greater than 'start'`
+        );
+      }
+      return this.fontName || { family: "Roboto", style: "Regular" };
+    }
+  }
+
+  class ShapeWithTextNodeStub {
+    type = "SHAPE_WITH_TEXT";
+    private _text = new TextSublayerNode();
+    private _cornerRadius = 50;
+    shapeType:
+      | "SQUARE"
+      | "ELLIPSE"
+      | "ROUNDED_RECTANGLE"
+      | "DIAMOND"
+      | "TRIANGLE_UP"
+      | "TRIANGLE_DOWN"
+      | "PARALLELOGRAM_RIGHT"
+      | "PARALLELOGRAM_LEFT"
+      | "ENG_DATABASE"
+      | "ENG_QUEUE"
+      | "ENG_FILE"
+      | "ENG_FOLDER" = "ELLIPSE";
+    rotation = 0;
+
+    get text() {
+      return this._text;
+    }
+
+    get cornerRadius() {
+      return this._cornerRadius;
+    }
+  }
+
+  applyMixins(ShapeWithTextNodeStub, [
+    BaseNodeMixinStub,
+    LayoutMixinStub,
+    ExportMixinStub,
+    GeometryMixinStub
+  ]);
+
+  class StickyNodeStub {
+    type = "STICKY";
+    private _text = new TextSublayerNode();
+    authorVisible = true;
+    authorName = "";
+
+    get text() {
+      return this._text;
+    }
+  }
+
+  applyMixins(StickyNodeStub, [
+    BaseNodeMixinStub,
+    LayoutMixinStub,
+    ExportMixinStub,
+    GeometryMixinStub
+  ]);
+
+  class ConnectorNodeStub {
+    type = "CONNECTOR";
+    private _text = new TextSublayerNode();
+    private _textBackground;
+    private _cornerRadius;
+
+    connectorLineType: "ELBOWED" | "STRAIGHT";
+
+    connectorStart;
+    connectorEnd;
+    connectorStartStrokeCap;
+    connectorEndStrokeCap;
+
+    get cornerRadius() {
+      return this._cornerRadius;
+    }
+
+    get textBackground() {
+      return this._textBackground;
+    }
+
+    get text() {
+      return this._text;
+    }
+  }
+
+  applyMixins(ConnectorNodeStub, [
+    BaseNodeMixinStub,
+    LayoutMixinStub,
+    ExportMixinStub,
+    GeometryMixinStub
+  ]);
+
   class DocumentNodeStub {
     type = "DOCUMENT";
     children = [];
@@ -534,6 +707,20 @@ export const createFigma = (config: TConfig): PluginAPI => {
   }
 
   applyMixins(GroupNodeStub, [
+    BaseNodeMixinStub,
+    ChildrenMixinStub,
+    ExportMixinStub,
+    LayoutMixinStub
+  ]);
+
+  class BooleanOperationNodeStub {
+    type = "BOOLEAN_OPERATION";
+
+    booleanOperation: "UNION" | "INTERSECT" | "SUBTRACT" | "EXCLUDE";
+    expand = false;
+  }
+
+  applyMixins(BooleanOperationNodeStub, [
     BaseNodeMixinStub,
     ChildrenMixinStub,
     ExportMixinStub,
@@ -758,6 +945,22 @@ export const createFigma = (config: TConfig): PluginAPI => {
     }
 
     // @ts-ignore
+    createShapeWithText() {
+      const result: any = new ShapeWithTextNodeStub();
+      allocateNodeId(result);
+      this.root.appendChild(result);
+      return result;
+    }
+
+    // @ts-ignore
+    createSticky() {
+      const result: any = new StickyNodeStub();
+      allocateNodeId(result);
+      this.root.appendChild(result);
+      return result;
+    }
+
+    // @ts-ignore
     createComponent() {
       const result: any = new ComponentNodeStub();
       allocateNodeId(result);
@@ -776,6 +979,13 @@ export const createFigma = (config: TConfig): PluginAPI => {
     // @ts-ignore
     createText() {
       const result: any = new TextNodeStub();
+      allocateNodeId(result);
+      this.currentPage.appendChild(result);
+      return result;
+    }
+
+    createConnector() {
+      const result: any = new ConnectorNodeStub();
       allocateNodeId(result);
       this.currentPage.appendChild(result);
       return result;
@@ -849,6 +1059,31 @@ export const createFigma = (config: TConfig): PluginAPI => {
       };
     }
 
+    union(
+      nodes: readonly BaseNode[],
+      parent: BaseNode & ChildrenMixin,
+      index?: number
+    ): BooleanOperationNode {
+      if (joinedConfig.simulateErrors && (!nodes || nodes.length === 0)) {
+        throw new Error(
+          "Error: First argument must be an array of at least one node"
+        );
+      }
+
+      const booleanOperation: any = new BooleanOperationNodeStub();
+      booleanOperation.booleanOperation = "UNION";
+      allocateNodeId(booleanOperation);
+      nodes.forEach(node => booleanOperation.appendChild(node));
+      if (index) {
+        parent.insertChild(index, booleanOperation);
+      } else {
+        parent.appendChild(booleanOperation);
+      }
+      booleanOperation.parent = parent;
+
+      return booleanOperation;
+    }
+
     // @ts-ignore
     group(nodes: any, parent: any, index) {
       if (joinedConfig.simulateErrors && (!nodes || nodes.length === 0)) {
@@ -873,7 +1108,7 @@ export const createFigma = (config: TConfig): PluginAPI => {
       if (isFontLoaded(fontName)) {
         return;
       }
-      return new Promise(resolve => {
+      return new Promise<void>(resolve => {
         loadedFonts.push(fontName);
         resolve();
       });

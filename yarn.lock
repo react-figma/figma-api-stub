@@ -138,7 +138,7 @@
     exec-sh "^0.3.2"
     minimist "^1.2.0"
 
-"@figma/plugin-typings@^1.42.0":
+"@figma/plugin-typings@^1.42.1":
   version "1.42.1"
   resolved "https://registry.yarnpkg.com/@figma/plugin-typings/-/plugin-typings-1.42.1.tgz#b9999c3d162db9b3d384c609b15ed18e49b0540f"
   integrity sha512-TQy81xtgcNWhu2uSiOZIxzGOC8Y/9rcP04GLp2f5MGg/LOH5BPNIkc8mRYPqInwcgQTnvxDpirr8MpYQPYRwDQ==
