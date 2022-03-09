@@ -7,7 +7,3 @@ export const defaultConfig: TConfig = {
   simulateErrors: false,
   isWithoutTimeout: false
 };
-
-export class Config {
-  static joinedConfig: TConfig;
-}

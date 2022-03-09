@@ -121,12 +121,34 @@ export class TextSublayerNode {
   paragraphIndent: number;
   paragraphSpacing: number;
   fontSize: number | PluginAPI["mixed"];
-  fontName: FontName | PluginAPI["mixed"];
   textCase: TextCase | PluginAPI["mixed"];
   textDecoration: TextDecoration | PluginAPI["mixed"];
   letterSpacing: LetterSpacing | PluginAPI["mixed"];
   hyperlink: HyperlinkTarget | null | PluginAPI["mixed"];
-  characters: string;
+
+  private _fontName: FontName;
+  private _characters: string;
+
+  get fontName() {
+    return this._fontName || { family: "Roboto", style: "Regular" };
+  }
+  set fontName(fontName) {
+    if (this.config.simulateErrors && !fontName) {
+      throw new Error(`Error: fontName is undefined`);
+    }
+    this._fontName = fontName;
+  }
+  get characters() {
+    return this._characters || "";
+  }
+  set characters(characters) {
+    if (this.config.simulateErrors && !Fonts.isFontLoaded(this.fontName)) {
+      throw new Error(
+        `Error: font is not loaded ${this.fontName.family} ${this.fontName.style}`
+      );
+    }
+    this._characters = characters;
+  }
 
   constructor(private config: TConfig) {}
 
@@ -135,33 +157,33 @@ export class TextSublayerNode {
     characters: string,
     _useStyle: "BEFORE" | "AFTER" = "BEFORE"
   ): void {
-    if (this.config.simulateErrors && !Fonts.isFontLoaded(this.fontName)) {
+    if (this.config.simulateErrors && !Fonts.isFontLoaded(this._fontName)) {
       throw new Error(
-        `Error: font is not loaded ${(this.fontName as FontName).family} ${
-          (this.fontName as FontName).style
+        `Error: font is not loaded ${(this._fontName as FontName).family} ${
+          (this._fontName as FontName).style
         }`
       );
     }
     if (this.config.simulateErrors && start < 0) {
       throw new Error(`Error: Expected "start" to have value >=0`);
     }
-    if (this.config.simulateErrors && start > this.characters.length) {
+    if (this.config.simulateErrors && start > this._characters.length) {
       throw new Error(
         `Error: Cannot insert characters at index greater than the length of the text`
       );
     }
-    this.characters = [
-      this.characters.slice(0, start),
+    this._characters = [
+      this._characters.slice(0, start),
       characters,
-      this.characters.slice(start)
+      this._characters.slice(start)
     ].join("");
   }
 
   deleteCharacters(start: number, end: number): void {
-    if (this.config.simulateErrors && !Fonts.isFontLoaded(this.fontName)) {
+    if (this.config.simulateErrors && !Fonts.isFontLoaded(this._fontName)) {
       throw new Error(
-        `Error: font is not loaded ${(this.fontName as FontName).family} ${
-          (this.fontName as FontName).style
+        `Error: font is not loaded ${(this._fontName as FontName).family} ${
+          (this._fontName as FontName).style
         }`
       );
     }
@@ -171,14 +193,14 @@ export class TextSublayerNode {
     if (this.config.simulateErrors && end < 0) {
       throw new Error(`Error: Expected "end" to have value >=0`);
     }
-    if (this.config.simulateErrors && end > this.characters.length) {
+    if (this.config.simulateErrors && end > this._characters.length) {
       throw new Error(
         `Error: Cannot delete characters at index greater than the length of the text`
       );
     }
-    this.characters =
-      this.characters.slice(start, end) +
-      (end === this.characters.length ? "" : this.characters.slice(end + 1));
+    this._characters =
+      this._characters.slice(start, end) +
+      (end === this._characters.length ? "" : this._characters.slice(end + 1));
   }
 
   getRangeFontName(start: number, end: number): FontName | PluginAPI["mixed"] {
@@ -188,7 +210,7 @@ export class TextSublayerNode {
     if (this.config.simulateErrors && end < 0) {
       throw new Error(`Error: Expected "end" to have value >=0`);
     }
-    if (this.config.simulateErrors && end > this.characters.length) {
+    if (this.config.simulateErrors && end > this._characters.length) {
       throw new Error(
         `Error: Range outside of available characters. 'start' must be less than node.characters.length and 'end' must be less than or equal to node.characters.length`
       );
@@ -198,7 +220,7 @@ export class TextSublayerNode {
         `Error: Empty range selected. 'end' must be greater than 'start'`
       );
     }
-    return this.fontName || { family: "Roboto", style: "Regular" };
+    return this._fontName || { family: "Roboto", style: "Regular" };
   }
 }
 
