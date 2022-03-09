@@ -4,11 +4,11 @@
   "description": "Figma API stub",
   "main": "./dist/index.js",
   "scripts": {
-    "tsc": "tsc -p tsconfig.json",
+    "tsc": "tsc -p tsconfig.build.json",
     "prettify": "prettier \"src/**/*.{js,jsx,ts,tsx}\" --ignore-path ./.prettierignore --write && git add . && git status",
     "build": "npm run build:clean && npm run build:lib",
     "build:clean": "rimraf dist",
-    "build:lib": "cross-env BABEL_ENV=production tsc -p tsconfig.json",
+    "build:lib": "cross-env BABEL_ENV=production tsc -p tsconfig.build.json",
     "prepublishOnly": "npm run build",
     "test": "jest"
   },
