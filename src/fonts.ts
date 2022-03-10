@@ -111,3 +111,13 @@ export const Helvetica: Font[] = [
     }
   }
 ];
+
+export class Fonts {
+  static loadedFonts: Array<FontName> = [];
+
+  static isFontLoaded(fontName) {
+    return this.loadedFonts.find(
+      font => font.family === fontName.family && font.style === fontName.style
+    );
+  }
+}
