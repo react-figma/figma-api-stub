@@ -1,37 +1,124 @@
-import * as cloneDeep from "clone-deep";
+import { nanoid } from "nanoid";
 import { Subject, Subscription } from "rxjs";
 import { take } from "rxjs/operators";
+import {
+  getEffectStyleStub,
+  getGridStyleStub,
+  getPaintStyleStub,
+  getTextStyleStub
+} from "./styleStubs";
 import { applyMixins } from "./applyMixins";
-import { Helvetica, Roboto } from "./fonts";
-import { nanoid } from "nanoid";
+import {
+  BooleanOperationNodeStub,
+  ComponentNodeStub,
+  ConnectorNodeStub,
+  DocumentNodeStub,
+  FrameNodeStub,
+  GroupNodeStub,
+  InstanceNodeStub,
+  PageNodeStub,
+  RectangleNodeStub,
+  selectionChangeSubject,
+  ShapeWithTextNodeStub,
+  StickyNodeStub,
+  TextNodeStub
+} from "./componentStubs";
+import { defaultConfig, TConfig } from "./config";
+import { Fonts, Helvetica, Roboto } from "./fonts";
+import {
+  ExportMixinStub,
+  GeometryMixinStub,
+  getBaseNodeMixinStub,
+  getChildrenMixinStub,
+  getLayoutMixinStub
+} from "./mixins";
 
-type TConfig = {
-  simulateErrors?: boolean;
-  isWithoutTimeout?: boolean;
-};
+export const createFigma = (paramConfig: TConfig): PluginAPI => {
+  const config = { ...defaultConfig, ...paramConfig };
+  const BaseNodeMixinStub = getBaseNodeMixinStub(config);
+  const LayoutMixinStub = getLayoutMixinStub(config);
+  const ChildrenMixinStub = getChildrenMixinStub(config);
 
-const defaultConfig: TConfig = {
-  simulateErrors: false,
-  isWithoutTimeout: false
-};
+  applyMixins(RectangleNodeStub, [
+    BaseNodeMixinStub,
+    LayoutMixinStub,
+    ExportMixinStub,
+    GeometryMixinStub
+  ]);
 
-const isInsideInstance = node => {
-  if (!node.parent) {
-    return;
-  }
-  return node.parent.type === "INSTANCE" || isInsideInstance(node.parent);
-};
+  applyMixins(TextNodeStub, [
+    BaseNodeMixinStub,
+    LayoutMixinStub,
+    ExportMixinStub,
+    GeometryMixinStub
+  ]);
 
-export const createFigma = (config: TConfig): PluginAPI => {
-  const joinedConfig = { ...defaultConfig, ...config };
-  const loadedFonts: Array<FontName> = [];
-  const isFontLoaded = fontName => {
-    return loadedFonts.find(
-      font => font.family === fontName.family && font.style === fontName.style
-    );
-  };
+  applyMixins(ShapeWithTextNodeStub, [
+    BaseNodeMixinStub,
+    LayoutMixinStub,
+    ExportMixinStub,
+    GeometryMixinStub
+  ]);
 
-  const selectionChangeSubject = new Subject();
+  applyMixins(StickyNodeStub, [
+    BaseNodeMixinStub,
+    LayoutMixinStub,
+    ExportMixinStub,
+    GeometryMixinStub
+  ]);
+
+  applyMixins(ConnectorNodeStub, [
+    BaseNodeMixinStub,
+    LayoutMixinStub,
+    ExportMixinStub,
+    GeometryMixinStub
+  ]);
+
+  applyMixins(DocumentNodeStub, [BaseNodeMixinStub, ChildrenMixinStub]);
+
+  applyMixins(PageNodeStub, [
+    BaseNodeMixinStub,
+    ChildrenMixinStub,
+    ExportMixinStub
+  ]);
+
+  applyMixins(FrameNodeStub, [
+    BaseNodeMixinStub,
+    ChildrenMixinStub,
+    LayoutMixinStub,
+    ExportMixinStub,
+    GeometryMixinStub
+  ]);
+
+  applyMixins(GroupNodeStub, [
+    BaseNodeMixinStub,
+    ChildrenMixinStub,
+    ExportMixinStub,
+    LayoutMixinStub
+  ]);
+
+  applyMixins(BooleanOperationNodeStub, [
+    BaseNodeMixinStub,
+    ChildrenMixinStub,
+    ExportMixinStub,
+    LayoutMixinStub
+  ]);
+
+  applyMixins(ComponentNodeStub, [
+    BaseNodeMixinStub,
+    ChildrenMixinStub,
+    ExportMixinStub,
+    LayoutMixinStub,
+    GeometryMixinStub
+  ]);
+
+  applyMixins(InstanceNodeStub, [
+    BaseNodeMixinStub,
+    ExportMixinStub,
+    LayoutMixinStub,
+    ChildrenMixinStub
+  ]);
+
   const selectionChangeSubscribes = new Map<Function, Subscription>();
 
   const currentPageChangeSubject = new Subject();
@@ -81,690 +168,26 @@ export const createFigma = (config: TConfig): PluginAPI => {
     }
   }
 
-  class ChildrenMixinStub implements ChildrenMixin {
-    children: Array<any>;
-
-    appendChild(item) {
-      if (!this.children) {
-        this.children = [];
-      }
-      if (item.parent) {
-        item.parent.children = item.parent.children.filter(
-          child => child !== item
-        );
-      }
-
-      if (joinedConfig.simulateErrors && !item) {
-        throw new Error("Error: empty child");
-      }
-
-      if (
-        joinedConfig.simulateErrors &&
-        // @ts-ignore
-        this.type === "DOCUMENT" &&
-        item.type !== "PAGE"
-      ) {
-        throw new Error(
-          "Error: The root node cannot have children of type other than PAGE"
-        );
-      }
-      item.parent = this;
-      this.children.push(item);
-    }
-
-    insertChild(index: number, child: any) {
-      if (!this.children) {
-        this.children = [];
-      }
-
-      if (joinedConfig.simulateErrors && !child) {
-        throw new Error("Error: empty child");
-      }
-
-      // @ts-ignore
-      if (joinedConfig.simulateErrors && child.parent === this) {
-        throw new Error("Error: Node already inside parent");
-      }
-
-      if (
-        joinedConfig.simulateErrors &&
-        // @ts-ignore
-        this.type === "DOCUMENT" &&
-        child.type !== "PAGE"
-      ) {
-        throw new Error(
-          "Error: The root node cannot have children of type other than PAGE"
-        );
-      }
-      if (child.parent) {
-        child.parent.children = child.parent.children.filter(
-          _child => child !== _child
-        );
-      }
-      // @ts-ignore
-      child.parent = this;
-      this.children.splice(index, 0, child);
-    }
-
-    findAllWithCriteria<T extends NodeType[]>(criteria: { types: T }) {
-      const typeLookup = new Set(criteria.types);
-      return this.findAll(() => true).filter(child =>
-        typeLookup.has(child.type)
-      );
-    }
-
-    findAll(callback) {
-      if (!this.children) {
-        return [];
-      }
-      const matchingChildren = [];
-      this.children.forEach(child => {
-        if (callback(child)) {
-          matchingChildren.push(child);
-        }
-        if ("findAll" in child) {
-          matchingChildren.push(...child.findAll(callback));
-        }
-      });
-      return matchingChildren;
-    }
-
-    findOne(callback) {
-      const matches = this.findAll(callback);
-      if (matches.length > 0) {
-        return matches[0];
-      }
-      return null;
-    }
-
-    findChild(callback) {
-      if (!this.children) {
-        return null;
-      }
-      return this.children.find(callback);
-    }
-
-    findChildren(callback) {
-      if (!this.children) {
-        return null;
-      }
-      return this.children.filter(callback);
-    }
-  }
-
-  class BaseNodeMixinStub implements BaseNodeMixin {
-    id: string;
-    parent: (BaseNode & ChildrenMixin) | null;
-    name: string;
-    removed: boolean;
-    relaunchData: { [command: string]: string };
-    pluginData: { [key: string]: string } = {};
-    sharedPluginData: { [namespace: string]: { [key: string]: string } } = {};
-
-    _orig: BaseNodeMixin | null = null;
-
-    setPluginData(key: string, value: string) {
-      if (!this.pluginData) {
-        this.pluginData = {};
-      }
-      if (value === "") {
-        delete this.pluginData[key];
-      } else {
-        this.pluginData[key] = value;
-      }
-    }
-
-    getPluginData(key: string) {
-      if (joinedConfig.simulateErrors && this.removed) {
-        throw new Error(`The node with id ${this.id} does not exist`);
-      }
-      if (!this.pluginData) {
-        return;
-      }
-      if (this.pluginData[key]) {
-        return this.pluginData[key];
-      } else {
-        if (this._orig) {
-          return this._orig.getPluginData(key);
-        }
-      }
-    }
-
-    getPluginDataKeys = (): string[] => {
-      if (joinedConfig.simulateErrors && this.removed) {
-        throw new Error(`The node with id ${this.id} does not exist`);
-      }
-      if (!this.pluginData) {
-        return [];
-      }
-      return Object.keys(this.pluginData);
-    };
-
-    setSharedPluginData(namespace: string, key: string, value: string) {
-      if (!this.sharedPluginData) {
-        this.sharedPluginData = {};
-      }
-      if (!this.sharedPluginData[namespace]) {
-        this.sharedPluginData[namespace] = {};
-      }
-      if (value === "") {
-        delete this.sharedPluginData[namespace][key];
-      } else {
-        this.sharedPluginData[namespace][key] = value;
-      }
-    }
-
-    getSharedPluginData(namespace: string, key: string) {
-      if (!this.sharedPluginData) {
-        return;
-      }
-
-      if (
-        this.sharedPluginData[namespace] &&
-        this.sharedPluginData[namespace][key]
-      ) {
-        return this.sharedPluginData[namespace][key];
-      } else {
-        if (this._orig) {
-          return this._orig.getSharedPluginData(namespace, key);
-        }
-      }
-    }
-
-    getSharedPluginDataKeys(namespace: string): string[] {
-      if (!this.sharedPluginData || !this.sharedPluginData[namespace]) {
-        return;
-      }
-      return Object.keys(this.sharedPluginData[namespace]);
-    }
-
-    setRelaunchData(data: { [command: string]: string }) {
-      this.relaunchData = data;
-    }
-
-    getRelaunchData(): { [command: string]: string } {
-      return this.relaunchData || {};
-    }
-
-    remove() {
-      this.removed = true;
-      if (joinedConfig.simulateErrors && isInsideInstance(this)) {
-        throw new Error("Error: can't remove item");
-      }
-      if (this.parent) {
-        // @ts-ignore
-        this.parent.children = this.parent.children.filter(
-          (child: any) => child !== this
-        );
-      }
-    }
-  }
-
-  class LayoutMixinStub implements LayoutMixin {
-    layoutGrow: number;
-    rescale(scale: number): void {
-      if (joinedConfig.simulateErrors && scale < 0.01) {
-        throw new Error(
-          'Error: in rescale: Expected "scale" to have value >= 0.01'
-        );
-      }
-      this.width = this.width * scale;
-      this.height = this.height * scale;
-    }
-    absoluteTransform: Transform;
-    relativeTransform: Transform;
-    x: number;
-    y: number;
-    rotation: number;
-
-    width: number;
-    height: number;
-
-    constrainProportions: boolean;
-    layoutAlign: LayoutMixin["layoutAlign"];
-
-    absoluteRenderBounds: Rect | null;
-
-    resize(width, height) {
-      if (joinedConfig.simulateErrors && isInsideInstance(this)) {
-        throw new Error("Error: can't change layout inside item");
-      }
-      if (joinedConfig.simulateErrors && width < 0.01) {
-        throw new Error(
-          'Error: in resize: Expected "width" to have value >= 0.01'
-        );
-      }
-      if (joinedConfig.simulateErrors && height < 0.01) {
-        throw new Error(
-          'Error: in resize: Expected "height" to have value >= 0.01'
-        );
-      }
-      this.width = width;
-      this.height = height;
-    }
-
-    resizeWithoutConstraints(width, height) {
-      this.width = width;
-      this.height = height;
-    }
-  }
-
-  class ExportMixinStub implements ExportMixin {
-    exportSettings: ReadonlyArray<ExportSettings>;
-
-    exportAsync(settings?: ExportSettings) {
-      // "exportAsync" is not implemented in stubs
-      return Promise.resolve(new Uint8Array());
-    }
-  }
-
-  class GeometryMixinStub implements GeometryMixin {
-    private _fills: ReadonlyArray<Paint> | PluginAPI["mixed"];
-    get fills() {
-      return this._fills || [];
-    }
-    set fills(theFills) {
-      this._fills = theFills;
-    }
-    strokes: ReadonlyArray<Paint>;
-    strokeWeight: number;
-    strokeMiterLimit: number;
-    strokeAlign: "CENTER" | "INSIDE" | "OUTSIDE";
-    strokeCap: StrokeCap | PluginAPI["mixed"];
-    strokeJoin: StrokeJoin | PluginAPI["mixed"];
-    dashPattern: ReadonlyArray<number>;
-    fillStyleId: string | PluginAPI["mixed"];
-    strokeStyleId: string;
-    strokeGeometry: VectorPaths;
-    fillGeometry: VectorPaths;
-    outlineStroke() {
-      return null;
-    }
-  }
-  class RectangleNodeStub extends BaseNodeMixinStub {
-    type = "RECTANGLE";
-  }
-
-  applyMixins(RectangleNodeStub, [
-    BaseNodeMixinStub,
-    LayoutMixinStub,
-    ExportMixinStub,
-    GeometryMixinStub
-  ]);
-
-  class TextNodeStub extends BaseNodeMixinStub {
-    type = "TEXT";
-    private _fontName: FontName;
-    private _characters: string;
-    private _textAutoResize: string;
-    get fontName() {
-      return this._fontName || { family: "Roboto", style: "Regular" };
-    }
-    set fontName(fontName) {
-      if (joinedConfig.simulateErrors && !fontName) {
-        throw new Error(`Error: fontName is undefined`);
-      }
-      this._fontName = fontName;
-    }
-    get characters() {
-      return this._characters || "";
-    }
-    set characters(characters) {
-      if (joinedConfig.simulateErrors && !isFontLoaded(this.fontName)) {
-        throw new Error(
-          `Error: font is not loaded ${this.fontName.family} ${this.fontName.style}`
-        );
-      }
-      this._characters = characters;
-    }
-    get textAutoResize() {
-      return this._textAutoResize;
-    }
-    set textAutoResize(value) {
-      if (joinedConfig.simulateErrors && !isFontLoaded(this.fontName)) {
-        throw new Error(
-          `Error: font is not loaded ${this.fontName.family} ${this.fontName.style}`
-        );
-      }
-      this._textAutoResize = value;
-    }
-    getRangeFontName(
-      start: number,
-      end: number
-    ): FontName | PluginAPI["mixed"] {
-      if (joinedConfig.simulateErrors && start < 0) {
-        throw new Error(`Error: Expected "start" to have value >=0`);
-      }
-      if (joinedConfig.simulateErrors && end < 0) {
-        throw new Error(`Error: Expected "end" to have value >=0`);
-      }
-      if (joinedConfig.simulateErrors && end > this._characters.length) {
-        throw new Error(
-          `Error: Range outside of available characters. 'start' must be less than node.characters.length and 'end' must be less than or equal to node.characters.length`
-        );
-      }
-      if (joinedConfig.simulateErrors && end === start) {
-        throw new Error(
-          `Error: Empty range selected. 'end' must be greater than 'start'`
-        );
-      }
-      return this._fontName || { family: "Roboto", style: "Regular" };
-    }
-    deleteCharacters(start: number, end: number): void {
-      if (joinedConfig.simulateErrors && !isFontLoaded(this.fontName)) {
-        throw new Error(
-          `Error: font is not loaded ${this.fontName.family} ${this.fontName.style}`
-        );
-      }
-      if (joinedConfig.simulateErrors && start < 0) {
-        throw new Error(`Error: Expected "start" to have value >=0`);
-      }
-      if (joinedConfig.simulateErrors && end < 0) {
-        throw new Error(`Error: Expected "end" to have value >=0`);
-      }
-      if (joinedConfig.simulateErrors && end > this._characters.length) {
-        throw new Error(
-          `Error: Cannot delete characters at index greater than the length of the text`
-        );
-      }
-      this._characters =
-        this._characters.slice(start, end) +
-        (end === this._characters.length
-          ? ""
-          : this._characters.slice(end + 1));
-    }
-    insertCharacters(
-      start: number,
-      characters: string,
-      _useStyle: "BEFORE" | "AFTER" = "BEFORE"
-    ): void {
-      if (joinedConfig.simulateErrors && !isFontLoaded(this.fontName)) {
-        throw new Error(
-          `Error: font is not loaded ${this.fontName.family} ${this.fontName.style}`
-        );
-      }
-      if (joinedConfig.simulateErrors && start < 0) {
-        throw new Error(`Error: Expected "start" to have value >=0`);
-      }
-      if (joinedConfig.simulateErrors && start > this._characters.length) {
-        throw new Error(
-          `Error: Cannot insert characters at index greater than the length of the text`
-        );
-      }
-      this._characters = [
-        this._characters.slice(0, start),
-        characters,
-        this._characters.slice(start)
-      ].join("");
-    }
-  }
-
-  applyMixins(TextNodeStub, [
-    BaseNodeMixinStub,
-    LayoutMixinStub,
-    ExportMixinStub,
-    GeometryMixinStub
-  ]);
-
-  class DocumentNodeStub extends BaseNodeMixinStub {
-    type = "DOCUMENT";
-    children = [];
-  }
-
-  applyMixins(DocumentNodeStub, [BaseNodeMixinStub, ChildrenMixinStub]);
-
-  class PageNodeStub extends BaseNodeMixinStub {
-    type = "PAGE";
-    children = [];
-    _selection: Array<SceneNode>;
-
-    get selection() {
-      return this._selection || [];
-    }
-
-    set selection(value) {
-      this._selection = value;
-      selectionChangeSubject.next();
-    }
-  }
-
-  applyMixins(PageNodeStub, [
-    BaseNodeMixinStub,
-    ChildrenMixinStub,
-    ExportMixinStub
-  ]);
-
-  class FrameNodeStub extends BaseNodeMixinStub {
-    type = "FRAME";
-    children = [];
-  }
-
-  applyMixins(FrameNodeStub, [
-    BaseNodeMixinStub,
-    ChildrenMixinStub,
-    LayoutMixinStub,
-    ExportMixinStub,
-    GeometryMixinStub
-  ]);
-
-  class GroupNodeStub {
-    type = "GROUP";
-
-    set constraints(value) {
-      if (joinedConfig.simulateErrors) {
-        throw new Error(
-          `Error: Cannot add property constraints, object is not extensible`
-        );
-      }
-    }
-  }
-
-  applyMixins(GroupNodeStub, [
-    BaseNodeMixinStub,
-    ChildrenMixinStub,
-    ExportMixinStub,
-    LayoutMixinStub
-  ]);
-
-  function cloneChildren(node) {
-    const clone = new node.constructor();
-    for (let key in node) {
-      if (typeof node[key] === "function") {
-        clone[key] = node[key].bind(clone);
-      } else {
-        clone[key] = node[key];
-      }
-    }
-    clone._orig = node;
-    clone.pluginData = {};
-    clone.sharedPluginData = {};
-    if ("children" in node) {
-      clone.children = node.children.map(child => cloneChildren(child));
-      clone.children.forEach(child => {
-        child.parent = clone;
-      });
-    }
-    return clone;
-  }
-
-  class ComponentNodeStub extends BaseNodeMixinStub {
-    type = "COMPONENT";
-    key = nanoid(40);
-    children = [];
-
-    createInstance() {
-      const instance = new InstanceNodeStub();
-      instance.children = this.children.map(child => cloneChildren(child));
-      instance.children.forEach(child => {
-        child.parent = this;
-      });
-      instance.pluginData = {};
-      instance._orig = this;
-      instance.mainComponent = this;
-      return instance;
-    }
-  }
-
-  applyMixins(ComponentNodeStub, [
-    BaseNodeMixinStub,
-    ChildrenMixinStub,
-    ExportMixinStub,
-    LayoutMixinStub,
-    GeometryMixinStub
-  ]);
-
-  class InstanceNodeStub extends BaseNodeMixinStub {
-    type = "INSTANCE";
-    children: any;
-    mainComponent: null | ComponentNodeStub;
-
-    detachInstance(): void {
-      this.type = "FRAME";
-    }
-  }
-
-  applyMixins(InstanceNodeStub, [
-    BaseNodeMixinStub,
-    ExportMixinStub,
-    LayoutMixinStub,
-    ChildrenMixinStub
-  ]);
-
   // --- styles
 
-  const styles = new Map<string, BaseStyle>();
-  const paintStyles = [];
-  const effectStyles = [];
-  const textStyles = [];
-  const gridStyles = [];
+  const PaintStyleStub = getPaintStyleStub(config);
+  const EffectStyleStub = getEffectStyleStub(config);
+  const TextStyleStub = getTextStyleStub(config);
+  const GridStyleStub = getGridStyleStub(config);
 
-  class BaseStyleStub implements BaseStyle {
-    id: string;
-    type: StyleType;
-    name: string;
-    description: string;
-    remote: boolean = false;
-    key: string;
-    documentationLinks: readonly DocumentationLink[];
-    removed: boolean;
-
-    relaunchData: { [command: string]: string };
-    pluginData: { [key: string]: string };
-    sharedPluginData: { [namespace: string]: { [key: string]: string } };
-
-    setPluginData(key: string, value: string) {
-      if (!this.pluginData) {
-        this.pluginData = {};
-      }
-      this.pluginData[key] = value;
-    }
-
-    getPluginData(key: string) {
-      if (joinedConfig.simulateErrors && this.removed) {
-        throw new Error(`The style with id ${this.id} does not exist`);
-      }
-      if (!this.pluginData) {
-        return;
-      }
-      return this.pluginData[key];
-    }
-
-    getPluginDataKeys(): string[] {
-      if (joinedConfig.simulateErrors && this.removed) {
-        throw new Error(`The style with id ${this.id} does not exist`);
-      }
-      if (!this.pluginData) {
-        return [];
-      }
-      return Object.keys(this.pluginData);
-    }
-
-    setSharedPluginData(namespace: string, key: string, value: string) {
-      if (!this.sharedPluginData) {
-        this.sharedPluginData = {};
-      }
-      if (!this.sharedPluginData[namespace]) {
-        this.sharedPluginData[namespace] = {};
-      }
-      this.sharedPluginData[namespace][key] = value;
-    }
-
-    getSharedPluginData(namespace: string, key: string) {
-      if (!this.sharedPluginData || !this.sharedPluginData[namespace]) {
-        return;
-      }
-      return this.sharedPluginData[namespace][key];
-    }
-
-    getSharedPluginDataKeys(namespace: string): string[] {
-      if (!this.sharedPluginData || !this.sharedPluginData[namespace]) {
-        return;
-      }
-      return Object.keys(this.sharedPluginData[namespace]);
-    }
-
-    remove(): void {
-      this.removed = true;
-      styles.delete(this.id);
-    }
-
-    async getPublishStatusAsync(): Promise<PublishStatus> {
-      return await "UNPUBLISHED";
-    }
-  }
-
-  applyMixins(BaseStyleStub, []);
-
-  class PaintStyleStub extends BaseStyleStub implements PaintStyle {
-    // @ts-ignore
-    type = "PAINT" as StyleType;
-    paints: readonly Paint[];
-
-    remove() {
-      super.remove();
-      paintStyles.splice(paintStyles.indexOf(this), 1);
-    }
-  }
-
-  class EffectStyleStub extends BaseStyleStub implements EffectStyle {
-    // @ts-ignore
-    type = "EFFECT" as StyleType;
-    effects: readonly Effect[];
-
-    remove() {
-      super.remove();
-      effectStyles.splice(effectStyles.indexOf(this), 1);
-    }
-  }
-
-  class TextStyleStub extends BaseStyleStub implements TextStyle {
-    // @ts-ignore
-    type = "TEXT" as StyleType;
-    fontName: FontName;
-    fontSize: number;
-    letterSpacing: LetterSpacing;
-    lineHeight: LineHeight;
-    paragraphIndent: number;
-    paragraphSpacing: number;
-    textCase: TextCase;
-    textDecoration: TextDecoration;
-
-    remove() {
-      super.remove();
-      textStyles.splice(textStyles.indexOf(this), 1);
-    }
-  }
-
-  class GridStyleStub extends BaseStyleStub implements GridStyle {
-    // @ts-ignore
-    type = "GRID" as StyleType;
-    layoutGrids: readonly LayoutGrid[];
-
-    remove() {
-      super.remove();
-      gridStyles.splice(gridStyles.indexOf(this), 1);
-    }
-  }
+  const styleBasics: {
+    styles: Map<string, BaseStyle>;
+    paintStyles: any[];
+    effectStyles: any[];
+    textStyles: any[];
+    gridStyles: any[];
+  } = {
+    styles: new Map<string, BaseStyle>(),
+    paintStyles: [],
+    effectStyles: [],
+    textStyles: [],
+    gridStyles: []
+  };
 
   // @ts-ignore
   class PluginApiStub implements PluginAPI {
@@ -797,7 +220,7 @@ export const createFigma = (config: TConfig): PluginAPI => {
 
     // @ts-ignore
     createPage() {
-      const result: any = new PageNodeStub();
+      const result: any = new PageNodeStub(config);
       allocateNodeId(result, true);
       this.root.appendChild(result);
       return result;
@@ -805,15 +228,31 @@ export const createFigma = (config: TConfig): PluginAPI => {
 
     // @ts-ignore
     createFrame() {
-      const result: any = new FrameNodeStub();
+      const result: any = new FrameNodeStub(config);
       allocateNodeId(result);
       this.currentPage.appendChild(result);
       return result;
     }
 
     // @ts-ignore
+    createShapeWithText() {
+      const result: any = new ShapeWithTextNodeStub(config);
+      allocateNodeId(result);
+      this.root.appendChild(result);
+      return result;
+    }
+
+    // @ts-ignore
+    createSticky() {
+      const result: any = new StickyNodeStub(config);
+      allocateNodeId(result);
+      this.root.appendChild(result);
+      return result;
+    }
+
+    // @ts-ignore
     createComponent() {
-      const result: any = new ComponentNodeStub();
+      const result: any = new ComponentNodeStub(config);
       allocateNodeId(result);
       this.currentPage.appendChild(result);
       return result;
@@ -821,7 +260,7 @@ export const createFigma = (config: TConfig): PluginAPI => {
 
     // @ts-ignore
     createRectangle() {
-      const result: any = new RectangleNodeStub();
+      const result: any = new RectangleNodeStub(config);
       allocateNodeId(result);
       this.currentPage.appendChild(result);
       return result;
@@ -829,69 +268,76 @@ export const createFigma = (config: TConfig): PluginAPI => {
 
     // @ts-ignore
     createText() {
-      const result: any = new TextNodeStub();
+      const result: any = new TextNodeStub(config);
+      allocateNodeId(result);
+      this.currentPage.appendChild(result);
+      return result;
+    }
+
+    createConnector() {
+      const result: any = new ConnectorNodeStub(config);
       allocateNodeId(result);
       this.currentPage.appendChild(result);
       return result;
     }
 
     getStyleById(id) {
-      if (styles.has(id)) {
-        return styles.get(id);
+      if (styleBasics.styles.has(id)) {
+        return styleBasics.styles.get(id);
       }
 
       return null;
     }
 
     getLocalPaintStyles() {
-      return paintStyles;
+      return styleBasics.paintStyles;
     }
 
     getLocalEffectStyles() {
-      return effectStyles;
+      return styleBasics.effectStyles;
     }
 
     getLocalTextStyles() {
-      return textStyles;
+      return styleBasics.textStyles;
     }
 
     getLocalGridStyles() {
-      return gridStyles;
+      return styleBasics.gridStyles;
     }
 
     // @ts-ignore
     createPaintStyle() {
-      const style = new PaintStyleStub();
+      const style = new PaintStyleStub(styleBasics);
       allocateStyleId(style);
-      styles.set(style.id, style);
-      paintStyles.push(style);
+      styleBasics.styles.set(style.id, style);
+      styleBasics.paintStyles.push(style);
       return style;
     }
 
     // @ts-ignore
     createEffectStyle() {
-      const style = new EffectStyleStub();
+      const style = new EffectStyleStub(styleBasics);
       allocateStyleId(style);
-      styles.set(style.id, style);
-      effectStyles.push(style);
+      styleBasics.styles.set(style.id, style);
+      styleBasics.effectStyles.push(style);
       return style;
     }
 
     // @ts-ignore
     createTextStyle() {
-      const style = new TextStyleStub();
+      const style = new TextStyleStub(styleBasics);
       allocateStyleId(style);
-      styles.set(style.id, style);
-      textStyles.push(style);
+      styleBasics.styles.set(style.id, style);
+      styleBasics.textStyles.push(style);
       return style;
     }
 
     // @ts-ignore
     createGridStyle() {
-      const style = new GridStyleStub();
+      const style = new GridStyleStub(styleBasics);
       allocateStyleId(style);
-      styles.set(style.id, style);
-      gridStyles.push(style);
+      styleBasics.styles.set(style.id, style);
+      styleBasics.gridStyles.push(style);
       return style;
     }
 
@@ -903,15 +349,79 @@ export const createFigma = (config: TConfig): PluginAPI => {
       };
     }
 
-    // @ts-ignore
-    group(nodes: any, parent: any, index) {
-      if (joinedConfig.simulateErrors && (!nodes || nodes.length === 0)) {
+    union(
+      nodes: readonly BaseNode[],
+      parent: BaseNode & ChildrenMixin,
+      index?: number
+    ): BooleanOperationNode {
+      const booleanOperation = this.booleanOperate(nodes, parent, index);
+      booleanOperation.booleanOperation = "UNION";
+      return booleanOperation as any;
+    }
+
+    intersect(
+      nodes: readonly BaseNode[],
+      parent: BaseNode & ChildrenMixin,
+      index?: number
+    ): BooleanOperationNode {
+      const booleanOperation = this.booleanOperate(nodes, parent, index);
+      booleanOperation.booleanOperation = "INTERSECT";
+      return booleanOperation as any;
+    }
+
+    subtract(
+      nodes: readonly BaseNode[],
+      parent: BaseNode & ChildrenMixin,
+      index?: number
+    ): BooleanOperationNode {
+      const booleanOperation = this.booleanOperate(nodes, parent, index);
+      booleanOperation.booleanOperation = "SUBTRACT";
+      return booleanOperation as any;
+    }
+
+    exlude(
+      nodes: readonly BaseNode[],
+      parent: BaseNode & ChildrenMixin,
+      index?: number
+    ): BooleanOperationNode {
+      const booleanOperation = this.booleanOperate(nodes, parent, index);
+      booleanOperation.booleanOperation = "EXCLUDE";
+      return booleanOperation as any;
+    }
+
+    private booleanOperate(
+      nodes: readonly BaseNode[],
+      parent: BaseNode & ChildrenMixin,
+      index?: number
+    ): BooleanOperationNodeStub {
+      if (config.simulateErrors && (!nodes || nodes.length === 0)) {
         throw new Error(
           "Error: First argument must be an array of at least one node"
         );
       }
 
-      const group: any = new GroupNodeStub();
+      const booleanOperation: any = new BooleanOperationNodeStub(config);
+      allocateNodeId(booleanOperation);
+      nodes.forEach(node => booleanOperation.appendChild(node));
+      if (index) {
+        parent.insertChild(index, booleanOperation);
+      } else {
+        parent.appendChild(booleanOperation);
+      }
+      booleanOperation.parent = parent;
+
+      return booleanOperation;
+    }
+
+    // @ts-ignore
+    group(nodes: any, parent: any, index) {
+      if (config.simulateErrors && (!nodes || nodes.length === 0)) {
+        throw new Error(
+          "Error: First argument must be an array of at least one node"
+        );
+      }
+
+      const group: any = new GroupNodeStub(config);
       allocateNodeId(group);
       nodes.forEach(node => group.appendChild(node));
       if (index) {
@@ -924,11 +434,11 @@ export const createFigma = (config: TConfig): PluginAPI => {
     }
     // @ts-ignore
     loadFontAsync(fontName) {
-      if (isFontLoaded(fontName)) {
+      if (Fonts.isFontLoaded(fontName)) {
         return;
       }
-      return new Promise(resolve => {
-        loadedFonts.push(fontName);
+      return new Promise<void>(resolve => {
+        Fonts.loadedFonts.push(fontName);
         resolve();
       });
     }
