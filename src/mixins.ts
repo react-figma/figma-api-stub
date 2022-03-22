@@ -129,21 +129,38 @@ export const getBaseNodeMixinStub = (config: TConfig) =>
     pluginData: { [key: string]: string };
     sharedPluginData: { [namespace: string]: { [key: string]: string } };
 
+    // instance nodes that are cloned from components will have `_orig` set to
+    // the value of the original node. This is used internally for inheriting
+    // things like plugin data and relaunch data
+    _orig: BaseNodeMixin | null = null;
+
     setPluginData(key: string, value: string) {
       if (!this.pluginData) {
         this.pluginData = {};
       }
-      this.pluginData[key] = value;
+      if (value === "") {
+        delete this.pluginData[key];
+      } else {
+        this.pluginData[key] = value;
+      }
     }
 
     getPluginData(key: string) {
       if (config.simulateErrors && this.removed) {
         throw new Error(`The node with id ${this.id} does not exist`);
       }
-      if (!this.pluginData) {
-        return;
+
+      // first, try to retrieve the key from local plugin data
+      if (this.pluginData && this.pluginData[key]) {
+        return this.pluginData[key];
       }
-      return this.pluginData[key];
+      // if we don't find the key in local plugin data, try and retrieve it from
+      // the original node it was cloned from, if it exists if
+      if (this._orig) {
+        return this._orig.getPluginData(key);
+      }
+      // otherwise, return nothing
+      return;
     }
 
     getPluginDataKeys(): string[] {
@@ -163,14 +180,32 @@ export const getBaseNodeMixinStub = (config: TConfig) =>
       if (!this.sharedPluginData[namespace]) {
         this.sharedPluginData[namespace] = {};
       }
-      this.sharedPluginData[namespace][key] = value;
+      if (value === "") {
+        delete this.sharedPluginData[namespace][key];
+        // if (Object.keys(this.sharedPluginData[namespace]).length === 0) {
+        //   delete this.sharedPluginData[namespace];
+        // }
+      } else {
+        this.sharedPluginData[namespace][key] = value;
+      }
     }
 
     getSharedPluginData(namespace: string, key: string) {
-      if (!this.sharedPluginData || !this.sharedPluginData[namespace]) {
-        return;
+      // first, try to retrieve the key from local plugin data
+      if (
+        this.sharedPluginData &&
+        this.sharedPluginData[namespace] &&
+        this.sharedPluginData[namespace][key]
+      ) {
+        return this.sharedPluginData[namespace][key];
       }
-      return this.sharedPluginData[namespace][key];
+      // if we don't find the key in local plugin data, try and retrieve it from
+      // the original node it was cloned from, if it exists if
+      if (this._orig) {
+        return this._orig.getSharedPluginData(namespace, key);
+      }
+      // otherwise, return nothing
+      return;
     }
 
     getSharedPluginDataKeys(namespace: string): string[] {
