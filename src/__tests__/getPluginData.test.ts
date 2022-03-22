@@ -21,6 +21,48 @@ describe("getPluginData", () => {
     expect(rect.getPluginDataKeys()).toEqual(["key1", "key2"]);
   });
 
+  it("can retreive inherited pluginData keys from the main component", () => {
+    const component = figma.createComponent();
+    const componentRect = figma.createRectangle();
+    componentRect.setPluginData("key1", "value1");
+    component.appendChild(componentRect);
+
+    const instance = component.createInstance();
+    const instanceRect = instance.findOne(node => node.type === "RECTANGLE");
+    instanceRect.setPluginData("key2", "value2");
+
+    expect(componentRect.getPluginDataKeys()).toEqual(
+      expect.arrayContaining(["key1"])
+    );
+    expect(componentRect.getPluginDataKeys()).toHaveLength(1);
+
+    expect(instanceRect.getPluginDataKeys()).toEqual(
+      expect.arrayContaining(["key1", "key2"])
+    );
+    expect(instanceRect.getPluginDataKeys()).toHaveLength(2);
+  });
+
+  it("can retreive inherited sharedPluginData keys from the main component", () => {
+    const component = figma.createComponent();
+    const componentRect = figma.createRectangle();
+    componentRect.setSharedPluginData("shared", "key1", "value1");
+    component.appendChild(componentRect);
+
+    const instance = component.createInstance();
+    const instanceRect = instance.findOne(node => node.type === "RECTANGLE");
+    instanceRect.setSharedPluginData("shared", "key2", "value2");
+
+    expect(componentRect.getSharedPluginDataKeys("shared")).toEqual(
+      expect.arrayContaining(["key1"])
+    );
+    expect(componentRect.getSharedPluginDataKeys("shared")).toHaveLength(1);
+
+    expect(instanceRect.getSharedPluginDataKeys("shared")).toEqual(
+      expect.arrayContaining(["key1", "key2"])
+    );
+    expect(instanceRect.getSharedPluginDataKeys("shared")).toHaveLength(2);
+  });
+
   it("removed node throws error", () => {
     const rect = figma.createRectangle();
     rect.setPluginData("key", "value");

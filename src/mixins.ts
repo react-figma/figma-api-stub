@@ -167,10 +167,15 @@ export const getBaseNodeMixinStub = (config: TConfig) =>
       if (config.simulateErrors && this.removed) {
         throw new Error(`The node with id ${this.id} does not exist`);
       }
-      if (!this.pluginData) {
-        return [];
-      }
-      return Object.keys(this.pluginData);
+      // get all local and inherited keys
+      const localKeys = this.pluginData ? Object.keys(this.pluginData) : [];
+      const inheritedKeys = this._orig ? this._orig.getPluginDataKeys() : [];
+
+      // combine them into one list and de-dupe any copies
+      const combinedKeys = Array.from(
+        new Set([...localKeys, ...inheritedKeys])
+      );
+      return combinedKeys;
     }
 
     setSharedPluginData(namespace: string, key: string, value: string) {
@@ -209,10 +214,20 @@ export const getBaseNodeMixinStub = (config: TConfig) =>
     }
 
     getSharedPluginDataKeys(namespace: string): string[] {
-      if (!this.sharedPluginData || !this.sharedPluginData[namespace]) {
-        return;
-      }
-      return Object.keys(this.sharedPluginData[namespace]);
+      // get all local and inherited keys
+      const localKeys =
+        this.sharedPluginData && this.sharedPluginData[namespace]
+          ? Object.keys(this.sharedPluginData[namespace])
+          : [];
+      const inheritedKeys = this._orig
+        ? this._orig.getSharedPluginDataKeys(namespace)
+        : [];
+
+      // combine them into one list and de-dupe any copies
+      const combinedKeys = Array.from(
+        new Set([...localKeys, ...inheritedKeys])
+      );
+      return combinedKeys;
     }
 
     setRelaunchData(data: { [command: string]: string }) {
