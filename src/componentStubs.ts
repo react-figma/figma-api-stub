@@ -355,6 +355,26 @@ export class BooleanOperationNodeStub {
   expand = false;
 }
 
+function cloneChildren(node) {
+  const clone = new node.constructor();
+  for (let key in node) {
+    if (typeof node[key] === "function") {
+      clone[key] = node[key].bind(clone);
+    } else {
+      clone[key] = node[key];
+    }
+  }
+  clone._orig = node;
+  clone.pluginData = {};
+  clone.sharedPluginData = {};
+  if ("children" in node) {
+    clone.children = node.children.map(child => cloneChildren(child));
+    clone.children.forEach(child => {
+      child.parent = clone;
+    });
+  }
+  return clone;
+}
 export class ComponentNodeStub {
   constructor(private config: TConfig) {}
 
@@ -363,7 +383,12 @@ export class ComponentNodeStub {
   children = [];
   createInstance() {
     const instance = new InstanceNodeStub(this.config);
-    instance.children = cloneDeep(this.children);
+    instance.children = this.children.map(child => cloneChildren(child));
+    instance.children.forEach(child => {
+      child.parent = this;
+    });
+    // instance.pluginData = {};
+    instance._orig = this;
     instance.mainComponent = this;
     return instance;
   }
@@ -375,6 +400,8 @@ export class InstanceNodeStub {
   type = "INSTANCE";
   children: any;
   mainComponent: null | ComponentNodeStub;
+
+  _orig: ComponentNodeStub | null;
 
   detachInstance(): void {
     this.type = "FRAME";

@@ -115,7 +115,8 @@ export const createFigma = (paramConfig: TConfig): PluginAPI => {
   applyMixins(InstanceNodeStub, [
     BaseNodeMixinStub,
     ExportMixinStub,
-    LayoutMixinStub
+    LayoutMixinStub,
+    ChildrenMixinStub
   ]);
 
   const selectionChangeSubscribes = new Map<Function, Subscription>();
