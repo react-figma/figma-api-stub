@@ -12,6 +12,8 @@ export class RectangleNodeStub {
   type = "RECTANGLE";
 }
 
+const defaultFont = { family: "Inter", style: "Regular" };
+
 export class TextNodeStub {
   constructor(private config: TConfig) {}
 
@@ -20,7 +22,7 @@ export class TextNodeStub {
   private _characters: string;
   private _textAutoResize: string;
   get fontName() {
-    return this._fontName || { family: "Roboto", style: "Regular" };
+    return this._fontName || defaultFont;
   }
   set fontName(fontName) {
     if (this.config.simulateErrors && !fontName) {
@@ -67,7 +69,7 @@ export class TextNodeStub {
         `Error: Empty range selected. 'end' must be greater than 'start'`
       );
     }
-    return this._fontName || { family: "Roboto", style: "Regular" };
+    return this._fontName || defaultFont;
   }
   deleteCharacters(start: number, end: number): void {
     if (this.config.simulateErrors && !Fonts.isFontLoaded(this.fontName)) {
@@ -130,7 +132,7 @@ export class TextSublayerNode {
   private _characters: string;
 
   get fontName() {
-    return this._fontName || { family: "Roboto", style: "Regular" };
+    return this._fontName || defaultFont;
   }
   set fontName(fontName) {
     if (this.config.simulateErrors && !fontName) {
@@ -220,7 +222,7 @@ export class TextSublayerNode {
         `Error: Empty range selected. 'end' must be greater than 'start'`
       );
     }
-    return this._fontName || { family: "Roboto", style: "Regular" };
+    return this._fontName || defaultFont;
   }
 }
 
