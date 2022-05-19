@@ -24,7 +24,7 @@ import {
   TextNodeStub
 } from "./componentStubs";
 import { defaultConfig, TConfig } from "./config";
-import { Fonts, Helvetica, Roboto } from "./fonts";
+import { Fonts, Helvetica, Inter, Roboto } from "./fonts";
 import {
   ExportMixinStub,
   GeometryMixinStub,
@@ -444,7 +444,7 @@ export const createFigma = (paramConfig: TConfig): PluginAPI => {
     }
 
     listAvailableFontsAsync(): Promise<Font[]> {
-      return Promise.resolve([...Roboto, ...Helvetica]);
+      return Promise.resolve([...Inter, ...Roboto, ...Helvetica]);
     }
 
     on(type: ArgFreeEventType, callback: () => void);

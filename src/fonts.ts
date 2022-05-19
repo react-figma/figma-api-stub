@@ -1,3 +1,114 @@
+export const Inter: Font[] = [
+  {
+    fontName: {
+      family: "Inter",
+      style: "Thin"
+    }
+  },
+  {
+    fontName: {
+      family: "Inter",
+      style: "Extra Light"
+    }
+  },
+  {
+    fontName: {
+      family: "Inter",
+      style: "Light"
+    }
+  },
+  {
+    fontName: {
+      family: "Inter",
+      style: "Regular"
+    }
+  },
+  {
+    fontName: {
+      family: "Inter",
+      style: "Medium"
+    }
+  },
+  {
+    fontName: {
+      family: "Inter",
+      style: "Semi Bold"
+    }
+  },
+  {
+    fontName: {
+      family: "Inter",
+      style: "Bold"
+    }
+  },
+  {
+    fontName: {
+      family: "Inter",
+      style: "Extra Bold"
+    }
+  },
+  {
+    fontName: {
+      family: "Inter",
+      style: "Black"
+    }
+  },
+  {
+    fontName: {
+      family: "Inter",
+      style: "Thin Italic"
+    }
+  },
+  {
+    fontName: {
+      family: "Inter",
+      style: "Extra Light Italic"
+    }
+  },
+  {
+    fontName: {
+      family: "Inter",
+      style: "Light Italic"
+    }
+  },
+  {
+    fontName: {
+      family: "Inter",
+      style: "Regular Italic"
+    }
+  },
+  {
+    fontName: {
+      family: "Inter",
+      style: "Medium Italic"
+    }
+  },
+  {
+    fontName: {
+      family: "Inter",
+      style: "Semi Bold Italic"
+    }
+  },
+  {
+    fontName: {
+      family: "Inter",
+      style: "Bold Italic"
+    }
+  },
+  {
+    fontName: {
+      family: "Inter",
+      style: "Extra Bold Italic"
+    }
+  },
+  {
+    fontName: {
+      family: "Inter",
+      style: "Black Italic"
+    }
+  }
+];
+
 export const Roboto: Font[] = [
   {
     fontName: {
