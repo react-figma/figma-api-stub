@@ -314,6 +314,7 @@ export class PageNodeStub {
   type = "PAGE";
   children = [];
   _selection: Array<SceneNode>;
+  _backgrounds: Array<Paint>;
 
   constructor(private config: TConfig) {}
 
@@ -324,6 +325,36 @@ export class PageNodeStub {
   set selection(value) {
     this._selection = value;
     selectionChangeSubject.next();
+  }
+
+  get backgrounds() {
+    return (
+      this._backgrounds || [
+        {
+          type: "SOLID",
+          visible: true,
+          opacity: 1,
+          blendMode: "NORMAL",
+          color: {
+            r: 0.9607843160629272,
+            g: 0.9607843160629272,
+            b: 0.9607843160629272
+          }
+        }
+      ]
+    );
+  }
+
+  set backgrounds(value) {
+    if (
+      this.config.simulateErrors &&
+      (value.length !== 1 || value[0].type !== "SOLID")
+    ) {
+      throw new Error(
+        `Error: in set_backgrounds: Page backgrounds must be a single solid paint`
+      );
+    }
+    this._backgrounds = value;
   }
 }
 
