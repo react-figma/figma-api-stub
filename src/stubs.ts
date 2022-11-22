@@ -39,6 +39,12 @@ export const createFigma = (paramConfig: TConfig): PluginAPI => {
   const LayoutMixinStub = getLayoutMixinStub(config);
   const ChildrenMixinStub = getChildrenMixinStub(config);
 
+  // @ts-ignore
+  global.__html__ = "main.html";
+
+  // @ts-ignore
+  global.__uiFiles__ = {};
+
   applyMixins(RectangleNodeStub, [
     BaseNodeMixinStub,
     LayoutMixinStub,
