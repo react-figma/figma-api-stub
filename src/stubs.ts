@@ -541,6 +541,10 @@ export const createFigma = (paramConfig: TConfig): PluginAPI => {
       };
       return _genNodeById([figma.root], id) || null;
     }
+
+    notify() {
+      return { cancel: () => {} };
+    }
   }
 
   // @ts-ignore
