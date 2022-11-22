@@ -39,6 +39,12 @@ export const createFigma = (paramConfig: TConfig): PluginAPI => {
   const LayoutMixinStub = getLayoutMixinStub(config);
   const ChildrenMixinStub = getChildrenMixinStub(config);
 
+  // @ts-ignore
+  global.__html__ = "main.html";
+
+  // @ts-ignore
+  global.__uiFiles__ = {};
+
   applyMixins(RectangleNodeStub, [
     BaseNodeMixinStub,
     LayoutMixinStub,
@@ -145,7 +151,40 @@ export const createFigma = (paramConfig: TConfig): PluginAPI => {
   };
 
   class UIAPIStub {
+    _listeners = new Set<MessageEventHandler>();
+
     onmessage: MessageEventHandler | undefined;
+
+    on: (type: "message", cb: MessageEventHandler | undefined) => void = (
+      type,
+      cb
+    ) => {
+      if (type === "message" && cb) {
+        this._listeners.add(cb);
+      }
+    };
+
+    off: (type: "message", cb: MessageEventHandler | undefined) => void = (
+      type,
+      cb
+    ) => {
+      if (type === "message" && cb) {
+        this._listeners.delete(cb);
+      }
+    };
+
+    once: (type: "message", cb: MessageEventHandler | undefined) => void = (
+      type,
+      cb
+    ) => {
+      if (type === "message" && cb) {
+        const wrappedCb = (pluginMessage, props) => {
+          cb(pluginMessage, props);
+          this.off("message", wrappedCb);
+        };
+        this.on("message", wrappedCb);
+      }
+    };
 
     postMessage(pluginMessage: any, options?: UIPostMessageOptions): void {
       const message = {
@@ -217,6 +256,8 @@ export const createFigma = (paramConfig: TConfig): PluginAPI => {
       this._currentPage = value;
       currentPageChangeSubject.next();
     }
+
+    skipInvisibleInstanceChildren: boolean = false;
 
     // @ts-ignore
     createPage() {
@@ -509,6 +550,12 @@ export const createFigma = (paramConfig: TConfig): PluginAPI => {
       };
       return _genNodeById([figma.root], id) || null;
     }
+
+    notify() {
+      return { cancel: () => {} };
+    }
+
+    showUI() {}
   }
 
   // @ts-ignore
@@ -523,6 +570,18 @@ export const createParentPostMessage = (
     const call = () => {
       // @ts-ignore
       figma.ui.onmessage(message.pluginMessage, { origin: null });
+    };
+    if (isWithoutTimeout) {
+      call();
+    } else {
+      setTimeout(call, 0);
+    }
+  } else {
+    const call = () => {
+      // @ts-ignore
+      figma.ui._listeners.forEach((cb: MessageEventHandler) => {
+        cb(message.pluginMessage, { origin: null });
+      });
     };
     if (isWithoutTimeout) {
       call();
