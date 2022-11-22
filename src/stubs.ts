@@ -256,6 +256,8 @@ export const createFigma = (paramConfig: TConfig): PluginAPI => {
       currentPageChangeSubject.next();
     }
 
+    skipInvisibleInstanceChildren: boolean = false;
+
     // @ts-ignore
     createPage() {
       const result: any = new PageNodeStub(config);
