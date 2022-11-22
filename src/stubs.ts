@@ -551,6 +551,8 @@ export const createFigma = (paramConfig: TConfig): PluginAPI => {
     notify() {
       return { cancel: () => {} };
     }
+
+    showUI() {}
   }
 
   // @ts-ignore
