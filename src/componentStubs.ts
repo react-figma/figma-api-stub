@@ -1,4 +1,3 @@
-import * as cloneDeep from "clone-deep";
 import { TConfig } from "./config";
 import { Fonts } from "./fonts";
 import { nanoid } from "nanoid";
