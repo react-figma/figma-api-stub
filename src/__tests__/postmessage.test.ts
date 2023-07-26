@@ -1,6 +1,7 @@
 import { createFigma, createParentPostMessage } from "../stubs";
 import { Subject } from "rxjs";
 import { take } from "rxjs/operators";
+import { jest } from "@jest/globals";
 
 describe("postMessage", () => {
   beforeEach(() => {

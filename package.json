@@ -10,10 +10,10 @@
     "build:clean": "rimraf dist",
     "build:lib": "cross-env BABEL_ENV=production tsc -p tsconfig.build.json",
     "prepublishOnly": "npm run build",
-    "test": "jest"
+    "test": "node --experimental-vm-modules --no-warnings node_modules/jest/bin/jest.js"
   },
   "jest": {
-    "preset": "ts-jest/presets/js-with-babel"
+    "preset": "ts-jest/presets/default-esm"
   },
   "pre-commit": [
     "prettify",
@@ -46,7 +46,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "nanoid": "^3.1.20",
+    "nanoid": "^4.0.2",
     "rxjs": "^6.5.3"
   }
 }
