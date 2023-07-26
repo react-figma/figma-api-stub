@@ -1,6 +1,4 @@
 import { createFigma, createParentPostMessage } from "../stubs";
-import { Subject } from "rxjs";
-import { take } from "rxjs/operators";
 import { jest } from "@jest/globals";
 
 describe("postMessage", () => {
@@ -12,40 +10,42 @@ describe("postMessage", () => {
   });
 
   it("UI sends message and plugin receives it", async () => {
-    const waiting = new Subject();
+    let resolveWaiting;
+    const waiting = new Promise<void>(resolve => {
+      resolveWaiting = resolve;
+    });
     // @ts-ignore
-    figma.ui.onmessage = jest.fn().mockImplementation(() => waiting.next());
+    figma.ui.onmessage = jest.fn().mockImplementation(() => {
+      resolveWaiting();
+    });
     parent.postMessage({ pluginMessage: "abc" }, "*");
 
-    return new Promise<void>(resolve => {
-      waiting.pipe(take(1)).subscribe(() => {
-        // @ts-ignore
-        expect(figma.ui.onmessage).toHaveBeenCalledTimes(1);
-        // @ts-ignore
-        expect(figma.ui.onmessage).toHaveBeenCalledWith(
-          "abc",
-          expect.any(Object)
-        );
-        resolve();
-      });
-    });
+    // Wait for post message to fire.
+    await waiting;
+
+    // @ts-ignore
+    expect(figma.ui.onmessage).toHaveBeenCalledTimes(1);
+    // @ts-ignore
+    expect(figma.ui.onmessage).toHaveBeenCalledWith("abc", expect.any(Object));
   });
 
-  it("Plugin sends message and UI receives it", () => {
-    const waiting = new Subject();
+  it("Plugin sends message and UI receives it", async () => {
+    let resolveWaiting;
+    const waiting = new Promise<void>(resolve => {
+      resolveWaiting = resolve;
+    });
 
-    //@ts-ignore
-    global.onmessage = jest.fn().mockImplementation(() => waiting.next());
+    // @ts-ignore
+    global.onmessage = jest.fn().mockImplementation(() => {
+      resolveWaiting();
+    });
     // @ts-ignore
     figma.ui.postMessage("abc");
 
-    return new Promise<void>(resolve => {
-      waiting.pipe(take(1)).subscribe(() => {
-        //@ts-ignore
-        expect(global.onmessage).toHaveBeenCalledTimes(1);
-        resolve();
-      });
-    });
+    await waiting;
+
+    //@ts-ignore
+    expect(global.onmessage).toHaveBeenCalledTimes(1);
   });
 });
 

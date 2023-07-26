@@ -46,7 +46,6 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "nanoid": "^4.0.2",
-    "rxjs": "^6.5.3"
+    "nanoid": "^4.0.2"
   }
 }

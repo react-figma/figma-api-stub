@@ -1,6 +1,4 @@
 import { nanoid } from "nanoid";
-import { Subject, Subscription } from "rxjs";
-import { take } from "rxjs/operators";
 import {
   getEffectStyleStub,
   getGridStyleStub,
@@ -18,7 +16,7 @@ import {
   InstanceNodeStub,
   PageNodeStub,
   RectangleNodeStub,
-  selectionChangeSubject,
+  selectionChangeEventTarget,
   ShapeWithTextNodeStub,
   StickyNodeStub,
   TextNodeStub
@@ -125,10 +123,7 @@ export const createFigma = (paramConfig: TConfig): PluginAPI => {
     ChildrenMixinStub
   ]);
 
-  const selectionChangeSubscribes = new Map<Function, Subscription>();
-
-  const currentPageChangeSubject = new Subject();
-  const currentPageChangeSubscribes = new Map<Function, Subscription>();
+  const currentPageChangeEventTarget = new EventTarget();
 
   let majorId = 1;
   let minorId = 1;
@@ -254,7 +249,9 @@ export const createFigma = (paramConfig: TConfig): PluginAPI => {
 
     set currentPage(value) {
       this._currentPage = value;
-      currentPageChangeSubject.next();
+      currentPageChangeEventTarget.dispatchEvent(
+        new Event("currentpagechange")
+      );
     }
 
     skipInvisibleInstanceChildren: boolean = false;
@@ -493,15 +490,15 @@ export const createFigma = (paramConfig: TConfig): PluginAPI => {
     on(type: "drop", callback: (event: DropEvent) => boolean): void;
     on(type: any, callback: any) {
       if (type === "selectionchange") {
-        selectionChangeSubscribes.set(
-          callback,
-          selectionChangeSubject.subscribe(callback)
+        selectionChangeEventTarget.addEventListener(
+          "selectionchange",
+          callback
         );
       }
       if (type === "currentpagechange") {
-        currentPageChangeSubscribes.set(
-          callback,
-          currentPageChangeSubject.subscribe(callback)
+        currentPageChangeEventTarget.addEventListener(
+          "currentpagechange",
+          callback
         );
       }
     }
@@ -511,15 +508,17 @@ export const createFigma = (paramConfig: TConfig): PluginAPI => {
     once(type: "drop", callback: (event: DropEvent) => boolean): void;
     once(type: any, callback: any) {
       if (type === "selectionchange") {
-        selectionChangeSubscribes.set(
+        selectionChangeEventTarget.addEventListener(
+          "selectionchange",
           callback,
-          selectionChangeSubject.pipe(take(1)).subscribe(callback)
+          { once: true }
         );
       }
       if (type === "currentpagechange") {
-        currentPageChangeSubscribes.set(
+        currentPageChangeEventTarget.addEventListener(
+          "currentpagechange",
           callback,
-          currentPageChangeSubject.pipe(take(1)).subscribe(callback)
+          { once: true }
         );
       }
     }
@@ -529,10 +528,16 @@ export const createFigma = (paramConfig: TConfig): PluginAPI => {
     off(type: "drop", callback: (event: DropEvent) => boolean): void;
     off(type: any, callback: any) {
       if (type === "selectionchange") {
-        selectionChangeSubscribes.get(callback).unsubscribe();
+        selectionChangeEventTarget.removeEventListener(
+          "selectionchange",
+          callback
+        );
       }
       if (type === "currentpagechange") {
-        currentPageChangeSubscribes.get(callback).unsubscribe();
+        currentPageChangeEventTarget.removeEventListener(
+          "currentpagechange",
+          callback
+        );
       }
     }
 
