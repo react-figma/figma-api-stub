@@ -1,6 +1,4 @@
 import { nanoid } from "nanoid";
-import { Subject, Subscription } from "rxjs";
-import { take } from "rxjs/operators";
 import {
   getEffectStyleStub,
   getGridStyleStub,
@@ -18,7 +16,7 @@ import {
   InstanceNodeStub,
   PageNodeStub,
   RectangleNodeStub,
-  selectionChangeSubject,
+  selectionChangeEventTarget,
   ShapeWithTextNodeStub,
   StickyNodeStub,
   TextNodeStub
@@ -125,10 +123,7 @@ export const createFigma = (paramConfig: TConfig): PluginAPI => {
     ChildrenMixinStub
   ]);
 
-  const selectionChangeSubscribes = new Map<Function, Subscription>();
-
-  const currentPageChangeSubject = new Subject();
-  const currentPageChangeSubscribes = new Map<Function, Subscription>();
+  const currentPageChangeEventTarget = new EventTarget();
 
   let majorId = 1;
   let minorId = 1;
@@ -254,7 +249,9 @@ export const createFigma = (paramConfig: TConfig): PluginAPI => {
 
     set currentPage(value) {
       this._currentPage = value;
-      currentPageChangeSubject.next();
+      currentPageChangeEventTarget.dispatchEvent(
+        new Event("currentpagechange")
+      );
     }
 
     skipInvisibleInstanceChildren: boolean = false;
@@ -386,7 +383,8 @@ export const createFigma = (paramConfig: TConfig): PluginAPI => {
       const hash = getImageHash();
       return {
         hash,
-        getBytesAsync: () => Promise.resolve(bytes)
+        getBytesAsync: () => Promise.resolve(bytes),
+        getSizeAsync: () => Promise.resolve({ width: 100, height: 100 })
       };
     }
 
@@ -491,17 +489,27 @@ export const createFigma = (paramConfig: TConfig): PluginAPI => {
     on(type: ArgFreeEventType, callback: () => void);
     on(type: "run", callback: (event: RunEvent) => void);
     on(type: "drop", callback: (event: DropEvent) => boolean): void;
+    on(
+      type: "documentchange",
+      callback: (event: DocumentChangeEvent) => void
+    ): void;
+    on(
+      type: "textreview",
+      callback: (
+        event: TextReviewEvent
+      ) => Promise<TextReviewRange[]> | TextReviewRange[]
+    ): void;
     on(type: any, callback: any) {
       if (type === "selectionchange") {
-        selectionChangeSubscribes.set(
-          callback,
-          selectionChangeSubject.subscribe(callback)
+        selectionChangeEventTarget.addEventListener(
+          "selectionchange",
+          callback
         );
       }
       if (type === "currentpagechange") {
-        currentPageChangeSubscribes.set(
-          callback,
-          currentPageChangeSubject.subscribe(callback)
+        currentPageChangeEventTarget.addEventListener(
+          "currentpagechange",
+          callback
         );
       }
     }
@@ -509,17 +517,29 @@ export const createFigma = (paramConfig: TConfig): PluginAPI => {
     once(type: ArgFreeEventType, callback: () => void);
     once(type: "run", callback: (event: RunEvent) => void);
     once(type: "drop", callback: (event: DropEvent) => boolean): void;
+    once(
+      type: "documentchange",
+      callback: (event: DocumentChangeEvent) => void
+    ): void;
+    once(
+      type: "textreview",
+      callback: (
+        event: TextReviewEvent
+      ) => Promise<TextReviewRange[]> | TextReviewRange[]
+    ): void;
     once(type: any, callback: any) {
       if (type === "selectionchange") {
-        selectionChangeSubscribes.set(
+        selectionChangeEventTarget.addEventListener(
+          "selectionchange",
           callback,
-          selectionChangeSubject.pipe(take(1)).subscribe(callback)
+          { once: true }
         );
       }
       if (type === "currentpagechange") {
-        currentPageChangeSubscribes.set(
+        currentPageChangeEventTarget.addEventListener(
+          "currentpagechange",
           callback,
-          currentPageChangeSubject.pipe(take(1)).subscribe(callback)
+          { once: true }
         );
       }
     }
@@ -527,12 +547,28 @@ export const createFigma = (paramConfig: TConfig): PluginAPI => {
     off(type: ArgFreeEventType, callback: () => void);
     off(type: "run", callback: (event: RunEvent) => void);
     off(type: "drop", callback: (event: DropEvent) => boolean): void;
+    off(
+      type: "documentchange",
+      callback: (event: DocumentChangeEvent) => void
+    ): void;
+    off(
+      type: "textreview",
+      callback: (
+        event: TextReviewEvent
+      ) => Promise<TextReviewRange[]> | TextReviewRange[]
+    ): void;
     off(type: any, callback: any) {
       if (type === "selectionchange") {
-        selectionChangeSubscribes.get(callback).unsubscribe();
+        selectionChangeEventTarget.removeEventListener(
+          "selectionchange",
+          callback
+        );
       }
       if (type === "currentpagechange") {
-        currentPageChangeSubscribes.get(callback).unsubscribe();
+        currentPageChangeEventTarget.removeEventListener(
+          "currentpagechange",
+          callback
+        );
       }
     }
 

@@ -117,6 +117,10 @@ export const getChildrenMixinStub = (config: TConfig) =>
       }
       return this.children.filter(callback);
     }
+
+    findWidgetNodesByWidgetId(widgetId: string): WidgetNode[] {
+      return [];
+    }
   };
 
 export const getBaseNodeMixinStub = (config: TConfig) =>
@@ -128,6 +132,13 @@ export const getBaseNodeMixinStub = (config: TConfig) =>
     relaunchData: { [command: string]: string };
     pluginData: { [key: string]: string };
     sharedPluginData: { [namespace: string]: { [key: string]: string } };
+
+    readonly isAsset: boolean;
+    async getCSSAsync(): Promise<{
+      [key: string]: string;
+    }> {
+      return {};
+    }
 
     // instance nodes that are cloned from components will have `_orig` set to
     // the value of the original node. This is used internally for inheriting
@@ -250,6 +261,25 @@ export const getBaseNodeMixinStub = (config: TConfig) =>
         );
       }
     }
+
+    async getDevResourcesAsync(options?: {
+      includeChildren?: boolean;
+    }): Promise<DevResourceWithNodeId[]> {
+      return [];
+    }
+    async addDevResourceAsync(url: string, name?: string): Promise<void> {}
+    async editDevResourceAsync(
+      currentUrl: string,
+      newValue: {
+        name?: string;
+        url?: string;
+      }
+    ): Promise<void> {}
+    async deleteDevResourceAsync(url: string): Promise<void> {}
+    async setDevResourcePreviewAsync(
+      url: string,
+      preview: PlainTextElement
+    ): Promise<void> {}
   };
 
 export const getLayoutMixinStub = (config: TConfig) =>
@@ -269,14 +299,22 @@ export const getLayoutMixinStub = (config: TConfig) =>
     x: number;
     y: number;
     rotation: number;
+    layoutSizingHorizontal: "FIXED" | "HUG" | "FILL";
+    layoutSizingVertical: "FIXED" | "HUG" | "FILL";
 
     width: number;
     height: number;
+    minWidth: number | null;
+    maxWidth: number | null;
+    minHeight: number | null;
+    maxHeight: number | null;
 
     constrainProportions: boolean;
     layoutAlign: LayoutMixin["layoutAlign"];
+    layoutPositioning: AutoLayoutChildrenMixin["layoutPositioning"];
 
     absoluteRenderBounds: Rect | null;
+    absoluteBoundingBox: Rect | null;
 
     resize(width, height) {
       if (config.simulateErrors && isInsideInstance(this)) {
@@ -305,7 +343,16 @@ export const getLayoutMixinStub = (config: TConfig) =>
 export class ExportMixinStub implements ExportMixin {
   exportSettings: ReadonlyArray<ExportSettings>;
 
-  exportAsync(settings?: ExportSettings) {
+  exportAsync(settings: ExportSettingsSVGString): Promise<string>;
+  exportAsync(settings: ExportSettingsREST): Promise<Object>;
+  exportAsync(settings?: ExportSettings): Promise<Uint8Array>;
+  exportAsync(
+    settings:
+      | ExportSettingsSVGString
+      | ExportSettingsREST
+      | ExportSettings
+      | undefined
+  ): Promise<string | Object | Uint8Array> {
     // "exportAsync" is not implemented in stubs
     return Promise.resolve(new Uint8Array());
   }

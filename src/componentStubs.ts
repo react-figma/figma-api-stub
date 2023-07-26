@@ -1,9 +1,8 @@
 import { TConfig } from "./config";
 import { Fonts } from "./fonts";
 import { nanoid } from "nanoid";
-import { Subject } from "rxjs";
 
-export const selectionChangeSubject = new Subject();
+export const selectionChangeEventTarget = new EventTarget();
 
 export class RectangleNodeStub {
   constructor(private config: TConfig) {}
@@ -323,7 +322,7 @@ export class PageNodeStub {
 
   set selection(value) {
     this._selection = value;
-    selectionChangeSubject.next();
+    selectionChangeEventTarget.dispatchEvent(new Event("selectionchange"));
   }
 
   get backgrounds() {

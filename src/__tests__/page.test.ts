@@ -25,7 +25,10 @@ describe("page ", () => {
       page.backgrounds = [
         {
           type: "GRADIENT_LINEAR",
-          gradientTransform: [[0, 0, 0], [0, 0, 0]],
+          gradientTransform: [
+            [0, 0, 0],
+            [0, 0, 0]
+          ],
           gradientStops: []
         }
       ];
