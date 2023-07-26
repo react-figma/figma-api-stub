@@ -1,4 +1,4 @@
-import { createParentPostMessage, createFigma } from "../stubs";
+import { createFigma, createParentPostMessage } from "../stubs";
 import { Subject } from "rxjs";
 import { take } from "rxjs/operators";
 
@@ -7,7 +7,7 @@ describe("postMessage", () => {
     // @ts-ignore
     global.figma = createFigma({});
     // @ts-ignore
-    global.parent.postMessage = createParentPostMessage(global.figma);
+    global.parent = { postMessage: createParentPostMessage(global.figma) };
   });
 
   it("UI sends message and plugin receives it", async () => {
@@ -16,7 +16,7 @@ describe("postMessage", () => {
     figma.ui.onmessage = jest.fn().mockImplementation(() => waiting.next());
     parent.postMessage({ pluginMessage: "abc" }, "*");
 
-    return new Promise(resolve => {
+    return new Promise<void>(resolve => {
       waiting.pipe(take(1)).subscribe(() => {
         // @ts-ignore
         expect(figma.ui.onmessage).toHaveBeenCalledTimes(1);
@@ -38,7 +38,7 @@ describe("postMessage", () => {
     // @ts-ignore
     figma.ui.postMessage("abc");
 
-    return new Promise(resolve => {
+    return new Promise<void>(resolve => {
       waiting.pipe(take(1)).subscribe(() => {
         //@ts-ignore
         expect(global.onmessage).toHaveBeenCalledTimes(1);
