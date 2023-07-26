@@ -383,7 +383,8 @@ export const createFigma = (paramConfig: TConfig): PluginAPI => {
       const hash = getImageHash();
       return {
         hash,
-        getBytesAsync: () => Promise.resolve(bytes)
+        getBytesAsync: () => Promise.resolve(bytes),
+        getSizeAsync: () => Promise.resolve({ width: 100, height: 100 })
       };
     }
 
@@ -488,6 +489,16 @@ export const createFigma = (paramConfig: TConfig): PluginAPI => {
     on(type: ArgFreeEventType, callback: () => void);
     on(type: "run", callback: (event: RunEvent) => void);
     on(type: "drop", callback: (event: DropEvent) => boolean): void;
+    on(
+      type: "documentchange",
+      callback: (event: DocumentChangeEvent) => void
+    ): void;
+    on(
+      type: "textreview",
+      callback: (
+        event: TextReviewEvent
+      ) => Promise<TextReviewRange[]> | TextReviewRange[]
+    ): void;
     on(type: any, callback: any) {
       if (type === "selectionchange") {
         selectionChangeEventTarget.addEventListener(
@@ -506,6 +517,16 @@ export const createFigma = (paramConfig: TConfig): PluginAPI => {
     once(type: ArgFreeEventType, callback: () => void);
     once(type: "run", callback: (event: RunEvent) => void);
     once(type: "drop", callback: (event: DropEvent) => boolean): void;
+    once(
+      type: "documentchange",
+      callback: (event: DocumentChangeEvent) => void
+    ): void;
+    once(
+      type: "textreview",
+      callback: (
+        event: TextReviewEvent
+      ) => Promise<TextReviewRange[]> | TextReviewRange[]
+    ): void;
     once(type: any, callback: any) {
       if (type === "selectionchange") {
         selectionChangeEventTarget.addEventListener(
@@ -526,6 +547,16 @@ export const createFigma = (paramConfig: TConfig): PluginAPI => {
     off(type: ArgFreeEventType, callback: () => void);
     off(type: "run", callback: (event: RunEvent) => void);
     off(type: "drop", callback: (event: DropEvent) => boolean): void;
+    off(
+      type: "documentchange",
+      callback: (event: DocumentChangeEvent) => void
+    ): void;
+    off(
+      type: "textreview",
+      callback: (
+        event: TextReviewEvent
+      ) => Promise<TextReviewRange[]> | TextReviewRange[]
+    ): void;
     off(type: any, callback: any) {
       if (type === "selectionchange") {
         selectionChangeEventTarget.removeEventListener(

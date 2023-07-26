@@ -296,10 +296,10 @@
   "resolved" "https://registry.npmjs.org/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz"
   "version" "0.2.3"
 
-"@figma/plugin-typings@~1.42.1":
-  "integrity" "sha512-TQy81xtgcNWhu2uSiOZIxzGOC8Y/9rcP04GLp2f5MGg/LOH5BPNIkc8mRYPqInwcgQTnvxDpirr8MpYQPYRwDQ=="
-  "resolved" "https://registry.npmjs.org/@figma/plugin-typings/-/plugin-typings-1.42.1.tgz"
-  "version" "1.42.1"
+"@figma/plugin-typings@~1.71.1":
+  "integrity" "sha512-Ej8lieEvCSrSbpFcpBrBKZtjzdqj26QvRPi/yQiy8ENLcNzbSqD0fhegiXOkQjaLmkN4sIQlpY7xcds8HbgD1g=="
+  "resolved" "https://registry.npmjs.org/@figma/plugin-typings/-/plugin-typings-1.71.1.tgz"
+  "version" "1.71.1"
 
 "@istanbuljs/load-nyc-config@^1.0.0":
   "integrity" "sha512-VjeHSlIzpv/NyD3N0YuHfXOPDIixcA1q2ZV98wsMqcYlPmv2n3Yb2lYP9XMElnaFVXg5A7YLTeLu6V84uQDjmQ=="
