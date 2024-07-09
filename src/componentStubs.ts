@@ -268,7 +268,6 @@ export class TextSublayerNode {
     return this._fontName || defaultFont;
   }
 
-
   getRangeListOptions(
     start: number,
     end: number
