@@ -12,6 +12,7 @@ export class RectangleNodeStub {
 }
 
 const defaultFont = { family: "Inter", style: "Regular" };
+const defaultRangeListOptions = { type: "NONE" } as const;
 
 export class TextNodeStub {
   constructor(private config: TConfig) {}
@@ -20,6 +21,7 @@ export class TextNodeStub {
   private _fontName: FontName;
   private _characters: string;
   private _textAutoResize: string;
+  private _rangeListOptions: TextListOptions | PluginAPI["mixed"];
   get fontName() {
     return this._fontName || defaultFont;
   }
@@ -115,6 +117,47 @@ export class TextNodeStub {
       this._characters.slice(start)
     ].join("");
   }
+  getRangeListOptions(
+    start: number,
+    end: number
+  ): TextListOptions | PluginAPI["mixed"] {
+    if (this.config.simulateErrors && start < 0) {
+      throw new Error(`Error: Expected "start" to have value >=0`);
+    }
+    if (this.config.simulateErrors && end < 0) {
+      throw new Error(`Error: Expected "end" to have value >=0`);
+    }
+    if (this.config.simulateErrors && end > this._characters.length) {
+      throw new Error(
+        `Error: Range outside of available characters. 'start' must be less than node.characters.length and 'end' must be less than or equal to node.characters.length`
+      );
+    }
+    if (this.config.simulateErrors && end === start) {
+      throw new Error(
+        `Error: Empty range selected. 'end' must be greater than 'start'`
+      );
+    }
+    return this._rangeListOptions || defaultRangeListOptions;
+  }
+  setRangeListOptions(start: number, end: number, value: TextListOptions) {
+    if (this.config.simulateErrors && start < 0) {
+      throw new Error(`Error: Expected "start" to have value >=0`);
+    }
+    if (this.config.simulateErrors && end < 0) {
+      throw new Error(`Error: Expected "end" to have value >=0`);
+    }
+    if (this.config.simulateErrors && end > this._characters.length) {
+      throw new Error(
+        `Error: Range outside of available characters. 'start' must be less than node.characters.length and 'end' must be less than or equal to node.characters.length`
+      );
+    }
+    if (this.config.simulateErrors && end === start) {
+      throw new Error(
+        `Error: Empty range selected. 'end' must be greater than 'start'`
+      );
+    }
+    this._rangeListOptions = value;
+  }
 }
 
 export class TextSublayerNode {
@@ -129,6 +172,7 @@ export class TextSublayerNode {
 
   private _fontName: FontName;
   private _characters: string;
+  private _rangeListOptions: TextListOptions | PluginAPI["mixed"];
 
   get fontName() {
     return this._fontName || defaultFont;
@@ -222,6 +266,50 @@ export class TextSublayerNode {
       );
     }
     return this._fontName || defaultFont;
+  }
+
+
+  getRangeListOptions(
+    start: number,
+    end: number
+  ): TextListOptions | PluginAPI["mixed"] {
+    if (this.config.simulateErrors && start < 0) {
+      throw new Error(`Error: Expected "start" to have value >=0`);
+    }
+    if (this.config.simulateErrors && end < 0) {
+      throw new Error(`Error: Expected "end" to have value >=0`);
+    }
+    if (this.config.simulateErrors && end > this._characters.length) {
+      throw new Error(
+        `Error: Range outside of available characters. 'start' must be less than node.characters.length and 'end' must be less than or equal to node.characters.length`
+      );
+    }
+    if (this.config.simulateErrors && end === start) {
+      throw new Error(
+        `Error: Empty range selected. 'end' must be greater than 'start'`
+      );
+    }
+    return this._rangeListOptions || defaultRangeListOptions;
+  }
+
+  setRangeListOptions(start: number, end: number, value: TextListOptions) {
+    if (this.config.simulateErrors && start < 0) {
+      throw new Error(`Error: Expected "start" to have value >=0`);
+    }
+    if (this.config.simulateErrors && end < 0) {
+      throw new Error(`Error: Expected "end" to have value >=0`);
+    }
+    if (this.config.simulateErrors && end > this._characters.length) {
+      throw new Error(
+        `Error: Range outside of available characters. 'start' must be less than node.characters.length and 'end' must be less than or equal to node.characters.length`
+      );
+    }
+    if (this.config.simulateErrors && end === start) {
+      throw new Error(
+        `Error: Empty range selected. 'end' must be greater than 'start'`
+      );
+    }
+    this._rangeListOptions = value;
   }
 }
 
