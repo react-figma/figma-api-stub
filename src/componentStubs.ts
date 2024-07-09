@@ -12,6 +12,7 @@ export class RectangleNodeStub {
 }
 
 const defaultFont = { family: "Inter", style: "Regular" };
+const defaultRangeListOptions = { type: "NONE" } as const;
 
 export class TextNodeStub {
   constructor(private config: TConfig) {}
@@ -136,7 +137,7 @@ export class TextNodeStub {
         `Error: Empty range selected. 'end' must be greater than 'start'`
       );
     }
-    return this._rangeListOptions || { type: "NONE" };
+    return this._rangeListOptions || defaultRangeListOptions;
   }
   setRangeListOptions(start: number, end: number, value: TextListOptions) {
     if (this.config.simulateErrors && start < 0) {
@@ -288,7 +289,7 @@ export class TextSublayerNode {
         `Error: Empty range selected. 'end' must be greater than 'start'`
       );
     }
-    return this._rangeListOptions || { type: "NONE" };
+    return this._rangeListOptions || defaultRangeListOptions;
   }
 
   setRangeListOptions(start: number, end: number, value: TextListOptions) {
