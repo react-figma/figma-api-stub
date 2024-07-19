@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
     "outDir": "dist",
-    "module": "commonjs",
-    "target": "es5",
+    "module": "ES6",
+    "target": "es6",
     "lib": [
       "es5",
       "es6",
@@ -23,7 +23,8 @@
     "typeRoots": [
       "./node_modules/@types",
       "./node_modules/@figma"
-    ]
+    ],
+    "esModuleInterop": true
   },
   "include": [
     "src/**/*",

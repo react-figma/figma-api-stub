@@ -20,6 +20,7 @@ export const getBaseStyleStub = (config: TConfig) =>
     key: string;
     documentationLinks: readonly DocumentationLink[];
     removed: boolean;
+    consumers: StyleConsumers[];
 
     relaunchData: { [command: string]: string };
     pluginData: { [key: string]: string };
